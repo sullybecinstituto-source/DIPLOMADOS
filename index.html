@@ -137,7 +137,7 @@
         </div>
     </div>
 
-    <!-- Modal Certificación -->
+    <!-- Modal Certificación (Sin cambios solicitados) -->
     <div id="modal-certificacion" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-end sm:items-center justify-center z-[1000] p-0 sm:p-4">
         <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-lg shadow-2xl">
             <div class="p-6 border-b border-blue-50 flex justify-between items-center">
@@ -157,7 +157,7 @@
         </div>
     </div>
 
-    <!-- Modal Taller -->
+    <!-- Modal Taller (Sin cambios solicitados) -->
     <div id="modal-taller" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-end sm:items-center justify-center z-[1000] p-0 sm:p-4 overflow-y-auto">
         <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-lg shadow-2xl">
             <div class="p-6 border-b border-purple-50 flex justify-between items-center">
@@ -259,25 +259,23 @@
             document.getElementById('tabTal').classList.toggle('active', tab === 'talleres');
         };
 
-        // Recalcular en tiempo real en el modal
+        // Lógica de cálculo corregida
+        const calcNeto = (base, descPorc, docu) => {
+            const descuento = base * (descPorc / 100);
+            return Math.max(0, (base - descuento) + docu);
+        };
+
         window.recalcDiplomado = () => {
             const desc = Number(document.getElementById('descuentoDip').value) || 0;
             const docu = Number(document.getElementById('docuDip').value) || 0;
             
-            const vals = {
-                clase: Number(document.getElementById('claseDip').value) || 0,
-                mes: Number(document.getElementById('mesDip').value) || 0,
-                total: Number(document.getElementById('totalDip').value) || 0
-            };
-            
-            const apply = (val) => {
-                const conDesc = val - (val * (desc / 100));
-                return Math.max(0, conDesc + docu).toLocaleString();
-            };
+            const claseBase = Number(document.getElementById('claseDip').value) || 0;
+            const mesBase = Number(document.getElementById('mesDip').value) || 0;
+            const totalBase = Number(document.getElementById('totalDip').value) || 0;
 
-            document.getElementById('resClase').innerText = `Total: $${apply(vals.clase)}`;
-            document.getElementById('resMes').innerText = `Total: $${apply(vals.mes)}`;
-            document.getElementById('resTotal').innerText = `Total: $${apply(vals.total)}`;
+            document.getElementById('resClase').innerText = `Total: $${calcNeto(claseBase, desc, docu).toLocaleString()}`;
+            document.getElementById('resMes').innerText = `Total: $${calcNeto(mesBase, desc, docu).toLocaleString()}`;
+            document.getElementById('resTotal').innerText = `Total: $${calcNeto(totalBase, desc, docu).toLocaleString()}`;
         };
 
         window.abrirModal = (tipo, id = null) => {
@@ -289,20 +287,22 @@
             const editIdInput = document.getElementById(`editId${tipo === 'diplomado' ? 'Dip' : tipo === 'certificacion' ? 'Cert' : 'Tal'}`);
             if(editIdInput) editIdInput.value = id || '';
 
-            if (tipo === 'diplomado' && id) {
-                const d = dataDip.find(x => x.id === id);
-                if (d) {
-                    document.getElementById('nombreDip').value = d.nombre || '';
-                    document.getElementById('duracionDip').value = d.duracion || '';
-                    document.getElementById('fechaInicioDip').value = d.fechaInicio || '';
-                    document.getElementById('horarioDip').value = d.horario || '';
-                    document.getElementById('claseDip').value = d.clase || 0;
-                    document.getElementById('mesDip').value = d.mes || 0;
-                    document.getElementById('totalDip').value = d.total || 0;
-                    document.getElementById('descuentoDip').value = d.descuento || 0;
-                    document.getElementById('inscripcionDip').value = d.inscripcion || 0;
-                    document.getElementById('docuDip').value = d.documentacion || 0;
-                    document.getElementById('linkDip').value = d.link || '';
+            if (tipo === 'diplomado') {
+                if(id) {
+                    const d = dataDip.find(x => x.id === id);
+                    if (d) {
+                        document.getElementById('nombreDip').value = d.nombre || '';
+                        document.getElementById('duracionDip').value = d.duracion || '';
+                        document.getElementById('fechaInicioDip').value = d.fechaInicio || '';
+                        document.getElementById('horarioDip').value = d.horario || '';
+                        document.getElementById('claseDip').value = d.clase || 0;
+                        document.getElementById('mesDip').value = d.mes || 0;
+                        document.getElementById('totalDip').value = d.total || 0;
+                        document.getElementById('descuentoDip').value = d.descuento || 0;
+                        document.getElementById('inscripcionDip').value = d.inscripcion || 0;
+                        document.getElementById('docuDip').value = d.documentacion || 0;
+                        document.getElementById('linkDip').value = d.link || '';
+                    }
                 }
                 recalcDiplomado();
             } else if (tipo === 'taller') {
@@ -326,18 +326,20 @@
                     document.getElementById('linkCert').value = c.link || '';
                 }
             }
-            recalcDiplomado();
         };
 
         window.cerrarModal = (tipo) => { document.getElementById(`modal-${tipo}`).style.display = 'none'; };
 
-        // RENDERIZADO PRINCIPAL ACTUALIZADO CON DESGLOSE COMPLETO
         function renderDip() {
             const grid = document.getElementById('diplomasGrid');
             grid.innerHTML = dataDip.map(d => {
-                const descMonto = d.total * ((d.descuento || 0) / 100);
+                const desc = d.descuento || 0;
                 const docu = d.documentacion || 0;
-                const totalFinal = (d.total - descMonto) + docu;
+                
+                // Calculamos los netos individuales para mostrar en la tarjeta
+                const netoClase = calcNeto(d.clase || 0, desc, docu);
+                const netoMes = calcNeto(d.mes || 0, desc, docu);
+                const netoTotal = calcNeto(d.total || 0, desc, docu);
 
                 return `
                 <div class="bg-white p-5 rounded-3xl border border-pink-50 shadow-sm relative transition-transform hover:scale-[1.02]">
@@ -348,30 +350,34 @@
                         </div>
                     </div>
                     <div class="text-[10px] text-pink-400 font-bold mb-4 uppercase tracking-wider">
-                        ${d.duracion || 'Sin duración'} • ${d.horario || 'Sin horario'}
+                        ${d.duracion || '6 meses'} • ${d.horario || 'Sábados'}
                     </div>
                     
-                    <!-- Desglose de Cálculo en Tarjeta -->
-                    <div class="space-y-1.5 mb-4 bg-pink-50/30 p-3 rounded-2xl border border-pink-50/50">
-                        <div class="flex justify-between text-[11px]">
-                            <span class="text-gray-400 font-medium">Costo Base:</span>
-                            <span class="text-gray-600 font-bold">$${(d.total || 0).toLocaleString()}</span>
+                    <!-- Desglose Neto de cada Valor -->
+                    <div class="space-y-2 mb-4 bg-pink-50/30 p-4 rounded-2xl border border-pink-50/50">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase">Por Clase</span>
+                            <span class="text-sm font-bold text-gray-700">$${netoClase.toLocaleString()}</span>
                         </div>
-                        ${d.descuento > 0 ? `
-                        <div class="flex justify-between text-[11px]">
-                            <span class="text-green-500 font-medium">Descuento (${d.descuento}%):</span>
-                            <span class="text-green-600 font-bold">-$${descMonto.toLocaleString()}</span>
-                        </div>` : ''}
-                        ${docu > 0 ? `
-                        <div class="flex justify-between text-[11px]">
-                            <span class="text-pink-400 font-medium">Documentación:</span>
-                            <span class="text-pink-600 font-bold">+$${docu.toLocaleString()}</span>
-                        </div>` : ''}
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase">Mensualidad</span>
+                            <span class="text-sm font-bold text-gray-700">$${netoMes.toLocaleString()}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-pink-100 pt-2 mt-2">
+                            <span class="text-[10px] text-pink-500 font-bold uppercase">Pago Único (Neto)</span>
+                            <span class="text-lg font-black text-pink-600">$${netoTotal.toLocaleString()}</span>
+                        </div>
                     </div>
 
-                    <div class="flex justify-between items-center text-xs border-t pt-3 border-pink-50">
-                        <span class="text-gray-500 font-extrabold uppercase text-[10px]">Total a Pagar:</span>
-                        <span class="text-xl font-black text-pink-600">$${totalFinal.toLocaleString()}</span>
+                    ${desc > 0 ? `
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="bg-green-100 text-green-600 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Oferta ${desc}% OFF</span>
+                        <span class="text-[9px] text-gray-300 line-through font-bold">Base: $${(d.total || 0).toLocaleString()}</span>
+                    </div>` : ''}
+
+                    <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold pt-1">
+                        <span>Inscripción: $${(d.inscripcion || 0).toLocaleString()}</span>
+                        <span class="text-pink-300">Docs Incluidos</span>
                     </div>
                     
                     <button onclick="borrar('diplomados', '${d.id}')" class="absolute -bottom-2 -right-2 w-8 h-8 bg-white border border-gray-100 rounded-full flex items-center justify-center text-[10px] shadow-sm opacity-0 hover:opacity-100 transition-opacity">🗑️</button>
@@ -407,7 +413,7 @@
         }
 
         window.borrar = async (col, id) => {
-            if (!auth.currentUser || !confirm('¿Estás seguro de eliminar este elemento permanentemente?')) return;
+            if (!auth.currentUser || !confirm('¿Estás seguro de eliminar este elemento?')) return;
             await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', col, id));
         };
 
