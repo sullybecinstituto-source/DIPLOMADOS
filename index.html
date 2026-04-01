@@ -45,7 +45,8 @@
                 <h2 class="text-3xl font-bold text-gray-800">Panel de Administración</h2>
                 <p class="text-gray-500">Gestiona los diplomados activos</p>
             </div>
-            <button id="btnNuevo" onclick="abrirModal()" class="pink-gradient text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+            <!-- He quitado el atributo 'disabled' inicial para asegurar que siempre puedas intentar abrirlo -->
+            <button id="btnNuevo" onclick="abrirModal()" class="pink-gradient text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
                 <span>+ Nuevo Diplomado</span>
             </button>
         </div>
@@ -81,7 +82,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full pink-gradient text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:opacity-90 transition-all">
+                <button type="submit" id="btnGuardar" class="w-full pink-gradient text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:opacity-90 transition-all">
                     Guardar Diplomado
                 </button>
             </form>
@@ -93,7 +94,7 @@
         import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Firebase Configuration (Global variables injected by environment)
+        // Configuración de Firebase
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -105,10 +106,8 @@
         const statusMsg = document.getElementById('statusMsg');
         const btnNuevo = document.getElementById('btnNuevo');
 
-        // IMPORTANT: Rules require this specific path structure
         const publicCollectionPath = ['artifacts', appId, 'public', 'data', 'diplomados'];
 
-        // Auth Logic
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -118,14 +117,14 @@
                 }
             } catch (error) {
                 console.error("Auth Error:", error);
-                statusMsg.innerText = "Error de autenticación.";
+                statusMsg.innerText = "Error de conexión. Intenta recargar la página.";
             }
         };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 console.log("Sesión activa:", user.uid);
-                btnNuevo.disabled = false;
+                // Aseguramos que el botón sea cliqueable
                 btnNuevo.classList.remove('opacity-50', 'cursor-not-allowed');
                 statusMsg.innerText = "Cargando datos...";
                 startListening();
@@ -135,11 +134,9 @@
         });
 
         function startListening() {
-            // Guard against unauthenticated queries
             if (!auth.currentUser) return;
 
             const collectionRef = collection(db, ...publicCollectionPath);
-            // Simple query to avoid index requirements
             const q = query(collectionRef);
             
             onSnapshot(q, (snapshot) => {
@@ -149,7 +146,6 @@
                     return;
                 }
                 
-                // Sort in memory to avoid "missing index" errors
                 const docs = [];
                 snapshot.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
                 docs.sort((a, b) => {
@@ -174,13 +170,19 @@
                 });
             }, (error) => {
                 console.error("Firestore Error:", error);
-                grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-400 font-medium italic">Error al cargar datos. Verifica los permisos de la base de datos.</div>`;
+                statusMsg.innerText = "Error al cargar datos. Revisa tus permisos de Firebase.";
             });
         }
 
         form.onsubmit = async (e) => {
             e.preventDefault();
-            if (!auth.currentUser) return;
+            
+            // Si por alguna razón no hay usuario, intentamos conectar de nuevo
+            if (!auth.currentUser) {
+                alert("Todavía no hay conexión con el servidor. Por favor, espera un momento.");
+                initAuth();
+                return;
+            }
 
             const nombre = document.getElementById('nombre').value;
             const costo = document.getElementById('costo').value;
@@ -199,7 +201,7 @@
                 cerrarModal();
             } catch (error) {
                 console.error("Save Error:", error);
-                alert("Error al guardar: Permisos insuficientes.");
+                alert("No se pudo guardar. Verifica que las reglas de tu base de datos permitan escritura.");
             }
         };
 
