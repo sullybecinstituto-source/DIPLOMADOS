@@ -107,19 +107,20 @@
         import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // CONFIGURACIÓN DE FIREBASE
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'sullybec-admin';
         
-        // Define la ruta de la colección de manera consistente
+        // RUTA DE COLECCIÓN UNIFICADA (REGLA 1)
         const collectionPath = ['artifacts', appId, 'public', 'data', 'diplomados'];
         const collectionRef = collection(db, ...collectionPath);
 
         let diplomadosData = [];
 
-        // UI Helpers
+        // UI HELPERS
         window.abrirModal = (id = null) => {
             const modal = document.getElementById('modal');
             const form = document.getElementById('diplomaForm');
@@ -150,12 +151,16 @@
             document.getElementById('modal').style.display = 'none';
         };
 
-        // Firebase Logic - REGLA 3: Autenticación antes de cualquier consulta
+        // LÓGICA DE AUTENTICACIÓN (REGLA 3)
         const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                console.error("Auth Fail:", e);
             }
         };
 
@@ -167,8 +172,10 @@
             }
         });
 
+        // ESCUCHA DE DATOS (REGLA 2)
         function startListening() {
-            // REGLA 2: Consultas simples (sin orderBy/where múltiples)
+            if (!auth.currentUser) return;
+            
             onSnapshot(query(collectionRef), (snapshot) => {
                 const grid = document.getElementById('diplomasGrid');
                 grid.innerHTML = '';
@@ -176,7 +183,7 @@
 
                 snapshot.forEach(doc => diplomadosData.push({ id: doc.id, ...doc.data() }));
 
-                // Ordenar en memoria JS para evitar errores de índice en Firestore
+                // Ordenamiento manual para evitar necesidad de índices complejos
                 diplomadosData.sort((a, b) => {
                     const dateA = a.fechaCreacion?.toMillis ? a.fechaCreacion.toMillis() : 0;
                     const dateB = b.fechaCreacion?.toMillis ? b.fechaCreacion.toMillis() : 0;
@@ -214,11 +221,11 @@
                     `;
                 });
             }, (error) => {
-                console.error("Firestore Error:", error);
-                document.getElementById('diplomasGrid').innerHTML = `<div class="col-span-full text-center py-20 text-red-400">Error de permisos o conexión.</div>`;
+                console.error("Firestore Listen Error:", error);
             });
         }
 
+        // GUARDADO Y ACTUALIZACIÓN
         document.getElementById('diplomaForm').onsubmit = async (e) => {
             e.preventDefault();
             if (!auth.currentUser) return;
@@ -242,7 +249,8 @@
 
             try {
                 if(editId) {
-                    const docRef = doc(db, ...collectionPath, editId);
+                    // Corrección en la referencia del documento para edición
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'diplomados', editId);
                     await updateDoc(docRef, data);
                 } else {
                     await addDoc(collectionRef, { 
