@@ -10,24 +10,16 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fff5f7; -webkit-tap-highlight-color: transparent; padding-bottom: 20px; }
         .pink-gradient { background: linear-gradient(135deg, #ff85a2 0%, #ff4d6d 100%); }
         
-        /* Ajuste para que el modal siempre sea scrolleable */
-        .modal-container {
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .modal-content {
-            overflow-y: auto;
-            flex: 1;
-            padding-bottom: 2rem;
-        }
+        .modal-container { max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-content { overflow-y: auto; flex: 1; padding-bottom: 2rem; }
 
         input, select, textarea { border: 1px solid #ffe4e9; border-radius: 12px; padding: 10px; width: 100%; outline: none; font-size: 15px; background: white; }
         label { display: block; font-size: 0.65rem; font-weight: 800; color: #94a3b8; margin-bottom: 2px; text-transform: uppercase; margin-left: 4px; }
 
         .nav-container { background: #fee2e7; border-radius: 15px; padding: 4px; display: flex; gap: 4px; }
-        .nav-btn { flex: 1; padding: 8px 4px; border-radius: 12px; font-weight: 700; font-size: 12px; color: #ff85a2; border: none; cursor: pointer; }
-        .nav-btn.active { background: white; color: #ff4d6d; }
+        .nav-btn { flex: 1; padding: 8px 4px; border-radius: 12px; font-weight: 700; font-size: 12px; color: #ff85a2; border: none; cursor: pointer; transition: all 0.2s; }
+        .nav-btn.active { background: white; color: #ff4d6d; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -49,72 +41,110 @@
     </header>
 
     <main class="max-w-6xl mx-auto p-4">
-        <section id="sec-diplomados">
+        <!-- SECCIÓN DIPLOMADOS -->
+        <section id="sec-diplomados" class="tab-content">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-extrabold text-gray-800">Diplomados</h2>
-                <button onclick="abrirModal('diplomado')" class="pink-gradient text-white px-4 py-2 rounded-xl font-bold text-xs shadow-md">+ Nuevo</button>
+                <button onclick="abrirModal('diplomados')" class="pink-gradient text-white px-4 py-2 rounded-xl font-bold text-xs shadow-md">+ Nuevo Diplomado</button>
             </div>
             <div id="diplomasGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </section>
-        <!-- Las otras secciones se mantienen igual estructuralmente -->
-        <section id="sec-certificaciones" class="hidden"></section>
-        <section id="sec-talleres" class="hidden"></section>
+
+        <!-- SECCIÓN CERTIFICACIONES -->
+        <section id="sec-certificaciones" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-extrabold text-gray-800">Certificaciones</h2>
+                <button onclick="abrirModal('certificaciones')" class="pink-gradient text-white px-4 py-2 rounded-xl font-bold text-xs shadow-md">+ Nueva Certificación</button>
+            </div>
+            <div id="certGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- SECCIÓN TALLERES -->
+        <section id="sec-talleres" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-extrabold text-gray-800">Talleres</h2>
+                <button onclick="abrirModal('talleres')" class="pink-gradient text-white px-4 py-2 rounded-xl font-bold text-xs shadow-md">+ Nuevo Taller</button>
+            </div>
+            <div id="talleresGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </section>
     </main>
 
-    <!-- MODAL DIPLOMADO OPTIMIZADO -->
-    <div id="modal-diplomado" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[1000] p-4">
+    <!-- MODAL DINÁMICO -->
+    <div id="mainModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[1000] p-4">
         <div class="bg-white rounded-[24px] w-full max-w-xl shadow-2xl modal-container">
-            <!-- Header Fijo -->
             <div class="p-4 border-b border-pink-50 flex justify-between items-center">
-                <h3 class="font-bold text-pink-600">Configuración</h3>
-                <button onclick="cerrarModal('diplomado')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">&times;</button>
+                <h3 id="modalTitle" class="font-bold text-pink-600">Configuración</h3>
+                <button onclick="cerrarModal()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 font-bold">&times;</button>
             </div>
             
-            <!-- Cuerpo con Scroll -->
-            <form id="diplomadoForm" class="modal-content p-5 space-y-4">
-                <input type="hidden" id="editIdDip">
+            <form id="mainForm" class="modal-content p-5 space-y-4">
+                <input type="hidden" id="editId">
+                <input type="hidden" id="itemType">
                 
-                <div><label>Nombre del Diplomado</label><input type="text" id="nombreDip" required></div>
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label>Duración</label><input type="text" id="duracionDip"></div>
-                    <div><label>Fecha Inicio</label><input type="date" id="fechaInicioDip"></div>
-                </div>
-                
-                <div><label>Horario</label><input type="text" id="horarioDip"></div>
-                
-                <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[10px] font-bold text-pink-600 uppercase">Costos y Descuento</span>
-                        <div class="w-20"><label>Desc. %</label><input type="number" id="descuentoDip" value="0" oninput="recalcDiplomado()" class="py-1 text-center font-bold"></div>
-                    </div>
-                    
-                    <div>
-                        <label>Documentación Final ($)</label>
-                        <input type="number" id="docuDip" oninput="recalcDiplomado()" placeholder="0">
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-3">
-                        <div class="flex items-center gap-2">
-                            <div class="flex-1"><label>Clase Individual</label><input type="number" id="claseDip" oninput="recalcDiplomado()"></div>
-                            <div class="w-24 text-right pt-4"><span id="resClase" class="text-[11px] font-bold text-pink-500">$0</span></div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="flex-1"><label>Mensualidad</label><input type="number" id="mesDip" oninput="recalcDiplomado()"></div>
-                            <div class="w-24 text-right pt-4"><span id="resMes" class="text-[11px] font-bold text-pink-500">$0</span></div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="flex-1"><label>Pago Único Total</label><input type="number" id="totalDip" oninput="recalcDiplomado()"></div>
-                            <div class="w-24 text-right pt-4"><span id="resTotal" class="text-[11px] font-bold text-pink-500">$0</span></div>
-                        </div>
-                    </div>
+                <!-- CAMPO NOMBRE (COMÚN) -->
+                <div>
+                    <label id="labelNombre">Nombre</label>
+                    <input type="text" id="nombreInput" required>
                 </div>
 
-                <div><label>Inscripción ($)</label><input type="number" id="inscripcionDip"></div>
-                <div><label>Link Temario</label><input type="url" id="linkDip"></div>
+                <!-- GRUPO DIPLOMADOS (EXTENDIDO) -->
+                <div id="group-diplomados" class="space-y-4 hidden">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label>Duración</label><input type="text" id="duracionDip"></div>
+                        <div><label>Fecha Inicio</label><input type="date" id="fechaInicioDip"></div>
+                    </div>
+                    <div><label>Horario</label><input type="text" id="horarioDip"></div>
+                    <div><label>Inscripción ($)</label><input type="number" id="inscripcionDip"></div>
+                    <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100 space-y-3">
+                        <label class="text-pink-600">Opciones de Pago</label>
+                        <div class="grid grid-cols-1 gap-2">
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1"><label>Costo Clase</label><input type="number" id="claseDip" oninput="recalc()"></div>
+                                <div id="resClase" class="w-20 text-right text-[10px] font-bold text-pink-500 pt-4">$0</div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1"><label>Costo Mes</label><input type="number" id="mesDip" oninput="recalc()"></div>
+                                <div id="resMes" class="w-20 text-right text-[10px] font-bold text-pink-500 pt-4">$0</div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1"><label>Costo Total</label><input type="number" id="totalDip" oninput="recalc()"></div>
+                                <div id="resTotal" class="w-20 text-right text-[10px] font-bold text-pink-500 pt-4">$0</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-pink-100">
+                            <div><label>% Descuento</label><input type="number" id="descDip" value="0" oninput="recalc()"></div>
+                            <div><label>Doc. Final ($)</label><input type="number" id="docuDip" oninput="recalc()"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRUPO CERTIFICACIONES -->
+                <div id="group-certificaciones" class="space-y-4 hidden">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label>Costo Evaluación ($)</label><input type="number" id="costoEvalCert"></div>
+                        <div><label>Costo Certificado ($)</label><input type="number" id="costoCertCert"></div>
+                    </div>
+                </div>
+
+                <!-- GRUPO TALLERES -->
+                <div id="group-talleres" class="space-y-4 hidden">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label>Días impartición</label><input type="text" id="diasTal" placeholder="Ej: Lunes y Martes"></div>
+                        <div><label>Horario</label><input type="text" id="horarioTal"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label>Costo por Día ($)</label><input type="number" id="costoDiaTal"></div>
+                        <div><label>Costo Total ($)</label><input type="number" id="costoTotalTal"></div>
+                    </div>
+                </div>
+
+                <!-- LINK DRIVE (COMÚN) -->
+                <div>
+                    <label id="labelLink">Link de Drive</label>
+                    <input type="url" id="linkInput" placeholder="https://drive.google.com/...">
+                </div>
                 
-                <!-- Botón al final del scroll -->
-                <button type="submit" class="w-full pink-gradient text-white py-3 rounded-xl font-bold shadow-lg sticky bottom-0">Guardar Cambios</button>
+                <button type="submit" class="w-full pink-gradient text-white py-3 rounded-xl font-bold shadow-lg sticky bottom-0">Guardar</button>
             </form>
         </div>
     </div>
@@ -130,105 +160,182 @@
         const auth = getAuth(app);
         const APP_ID = 'sullybec-admin';
 
-        let dataDip = [];
+        let currentTab = 'diplomados';
+        let allData = { diplomados: [], certificaciones: [], talleres: [] };
 
-        onAuthStateChanged(auth, (u) => {
+        onAuthStateChanged(auth, u => {
             if (u) {
                 document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-green-400";
-                onSnapshot(collection(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados'), snap => {
-                    dataDip = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    renderDip();
+                ['diplomados', 'certificaciones', 'talleres'].forEach(col => {
+                    onSnapshot(collection(db, 'artifacts', APP_ID, 'public', 'data', col), snap => {
+                        allData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        render(col);
+                    });
                 });
             }
         });
         signInAnonymously(auth);
 
-        window.recalcDiplomado = () => {
-            const desc = Number(document.getElementById('descuentoDip').value) || 0;
-            // Quitamos el sumado automático de documentación en el visor rápido si solo quieres ver el descuento aplicado
-            const calc = (val) => {
-                const conDesc = val * (1 - (desc / 100));
-                return Math.floor(conDesc);
-            };
-
-            document.getElementById('resClase').innerText = `Neto: $${calc(Number(document.getElementById('claseDip').value) || 0)}`;
-            document.getElementById('resMes').innerText = `Neto: $${calc(Number(document.getElementById('mesDip').value) || 0)}`;
-            document.getElementById('resTotal').innerText = `Neto: $${calc(Number(document.getElementById('totalDip').value) || 0)}`;
+        window.recalc = () => {
+            const desc = Number(document.getElementById('descDip').value) || 0;
+            const f = (id) => Math.floor((Number(document.getElementById(id).value) || 0) * (1 - (desc/100)));
+            document.getElementById('resClase').innerText = `$${f('claseDip')}`;
+            document.getElementById('resMes').innerText = `$${f('mesDip')}`;
+            document.getElementById('resTotal').innerText = `$${f('totalDip')}`;
         };
 
         window.abrirModal = (tipo, id = null) => {
-            const modal = document.getElementById(`modal-${tipo}`);
-            modal.style.display = 'flex';
-            const form = document.getElementById(`${tipo}Form`);
+            currentTab = tipo;
+            const modal = document.getElementById('mainModal');
+            const form = document.getElementById('mainForm');
             form.reset();
-            document.getElementById('editIdDip').value = id || '';
+            modal.style.display = 'flex';
+            
+            document.getElementById('editId').value = id || '';
+            document.getElementById('itemType').value = tipo;
+            
+            // Ajustar UI del modal según tipo
+            document.getElementById('group-diplomados').classList.toggle('hidden', tipo !== 'diplomados');
+            document.getElementById('group-certificaciones').classList.toggle('hidden', tipo !== 'certificaciones');
+            document.getElementById('group-talleres').classList.toggle('hidden', tipo !== 'talleres');
+            
+            document.getElementById('modalTitle').innerText = tipo === 'diplomados' ? 'Configurar Diplomado' : (tipo === 'certificaciones' ? 'Configurar Estándar' : 'Configurar Taller');
+            document.getElementById('labelNombre').innerText = tipo === 'certificaciones' ? 'Nombre del Estándar' : 'Nombre';
+            document.getElementById('labelLink').innerText = tipo === 'certificaciones' ? 'Link al Estándar (Drive)' : 'Link al Temario (Drive)';
 
             if (id) {
-                const d = dataDip.find(x => x.id === id);
+                const d = allData[tipo].find(x => x.id === id);
                 if (d) {
-                    document.getElementById('nombreDip').value = d.nombre || '';
-                    document.getElementById('duracionDip').value = d.duracion || '';
-                    document.getElementById('fechaInicioDip').value = d.fechaInicio || '';
-                    document.getElementById('horarioDip').value = d.horario || '';
-                    document.getElementById('claseDip').value = d.clase || 0;
-                    document.getElementById('mesDip').value = d.mes || 0;
-                    document.getElementById('totalDip').value = d.total || 0;
-                    document.getElementById('descuentoDip').value = d.descuento || 0;
-                    document.getElementById('inscripcionDip').value = d.inscripcion || 0;
-                    document.getElementById('docuDip').value = d.documentacion || 0;
-                    document.getElementById('linkDip').value = d.link || '';
+                    document.getElementById('nombreInput').value = d.nombre || '';
+                    document.getElementById('linkInput').value = d.link || '';
+                    if(tipo === 'diplomados') {
+                        document.getElementById('duracionDip').value = d.duracion || '';
+                        document.getElementById('fechaInicioDip').value = d.fechaInicio || '';
+                        document.getElementById('horarioDip').value = d.horario || '';
+                        document.getElementById('claseDip').value = d.clase || 0;
+                        document.getElementById('mesDip').value = d.mes || 0;
+                        document.getElementById('totalDip').value = d.total || 0;
+                        document.getElementById('descDip').value = d.descuento || 0;
+                        document.getElementById('inscripcionDip').value = d.inscripcion || 0;
+                        document.getElementById('docuDip').value = d.documentacion || 0;
+                    } else if(tipo === 'certificaciones') {
+                        document.getElementById('costoEvalCert').value = d.evaluacion || 0;
+                        document.getElementById('costoCertCert').value = d.certificado || 0;
+                    } else if(tipo === 'talleres') {
+                        document.getElementById('diasTal').value = d.dias || '';
+                        document.getElementById('horarioTal').value = d.horario || '';
+                        document.getElementById('costoDiaTal').value = d.costoDia || 0;
+                        document.getElementById('costoTotalTal').value = d.costoTotal || 0;
+                    }
                 }
             }
-            recalcDiplomado();
+            recalc();
         };
 
-        window.cerrarModal = (tipo) => { document.getElementById(`modal-${tipo}`).style.display = 'none'; };
+        window.cerrarModal = () => document.getElementById('mainModal').style.display = 'none';
 
-        function renderDip() {
-            const grid = document.getElementById('diplomasGrid');
-            grid.innerHTML = dataDip.map(d => {
-                const desc = d.descuento || 0;
-                const neto = (d.total || 0) * (1 - (desc/100));
-                return `
-                <div class="bg-white p-4 rounded-2xl border border-pink-50 shadow-sm relative">
-                    <h4 class="font-bold text-gray-800 text-sm mb-1">${d.nombre}</h4>
-                    <div class="text-[10px] text-pink-400 font-bold mb-3 uppercase">${d.duracion}</div>
-                    <div class="flex justify-between items-end">
-                        <div>
-                            <span class="text-xs text-gray-400">Pago Único Desc:</span>
-                            <div class="text-lg font-black text-pink-600">$${Math.floor(neto).toLocaleString()}</div>
+        window.borrar = async (id, col) => {
+            if(confirm('¿Borrar registro?')) await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', col, id));
+        };
+
+        function render(col) {
+            const gridId = col === 'diplomados' ? 'diplomasGrid' : (col === 'certificaciones' ? 'certGrid' : 'talleresGrid');
+            const grid = document.getElementById(gridId);
+            if(!grid) return;
+
+            grid.innerHTML = allData[col].map(d => {
+                let infoHTML = '';
+                if(col === 'diplomados') {
+                    const neto = (d.total || 0) * (1 - ((d.descuento || 0)/100));
+                    const totalConDocu = neto + (d.documentacion || 0);
+                    infoHTML = `<div class="bg-pink-50/30 p-2 rounded-xl border border-pink-50/50">
+                        <div class="flex justify-between items-center text-[10px] mb-1 font-bold">
+                            <span class="text-gray-400 uppercase">Pago Único Desc:</span>
+                            <span class="text-pink-500 font-bold">$${Math.floor(neto).toLocaleString()}</span>
                         </div>
-                        <button onclick="abrirModal('diplomado', '${d.id}')" class="text-xs bg-gray-50 p-2 rounded-lg">✏️ Editar</button>
+                        <div class="flex justify-between items-center text-xs font-black pt-1 border-t border-pink-100/50 mt-1">
+                            <span class="text-gray-600 uppercase text-[9px]">Total Final:</span>
+                            <span class="text-pink-700">$${Math.floor(totalConDocu).toLocaleString()}</span>
+                        </div>
+                    </div>`;
+                } else if(col === 'certificaciones') {
+                    infoHTML = `<div class="grid grid-cols-2 gap-2 text-[10px] font-bold text-gray-500 uppercase">
+                        <div class="bg-gray-50 p-2 rounded-lg">Evaluación: <span class="block text-pink-600">$${(d.evaluacion || 0).toLocaleString()}</span></div>
+                        <div class="bg-gray-50 p-2 rounded-lg">Certificado: <span class="block text-pink-600">$${(d.certificado || 0).toLocaleString()}</span></div>
+                    </div>`;
+                } else {
+                    infoHTML = `<div class="text-[10px] font-bold text-gray-500 uppercase space-y-1">
+                        <div class="flex justify-between"><span>Días:</span><span class="text-pink-600">${d.dias || '-'}</span></div>
+                        <div class="flex justify-between"><span>Horario:</span><span class="text-pink-600 text-right">${d.horario || '-'}</span></div>
+                        <div class="flex justify-between border-t border-pink-50 pt-1 mt-1 text-xs text-pink-700"><span>Costo Total:</span><span>$${(d.costoTotal || 0).toLocaleString()}</span></div>
+                    </div>`;
+                }
+
+                return `
+                <div class="bg-white p-4 rounded-2xl border border-pink-50 shadow-sm relative hover:shadow-md transition-all">
+                    <div class="flex justify-between items-start mb-1">
+                        <h4 class="font-bold text-gray-800 text-sm uppercase pr-6">${d.nombre}</h4>
+                        <button onclick="borrar('${d.id}', '${col}')" class="text-gray-300 hover:text-red-400 p-1 absolute top-3 right-3">🗑️</button>
+                    </div>
+                    <div class="mb-3">${infoHTML}</div>
+                    <div class="flex gap-2">
+                        ${d.link ? `<a href="${d.link}" target="_blank" class="flex-1 text-[9px] bg-pink-100 text-pink-600 py-2 rounded-lg font-bold text-center">📄 Drive</a>` : ''}
+                        <button onclick="abrirModal('${col}', '${d.id}')" class="flex-1 text-[10px] bg-gray-100 py-2 rounded-lg font-bold">✏️ Editar</button>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        document.getElementById('diplomadoForm').onsubmit = async (e) => {
+        document.getElementById('mainForm').onsubmit = async (e) => {
             e.preventDefault();
-            const id = document.getElementById('editIdDip').value;
-            const payload = {
-                nombre: document.getElementById('nombreDip').value,
-                duracion: document.getElementById('duracionDip').value,
-                fechaInicio: document.getElementById('fechaInicioDip').value,
-                horario: document.getElementById('horarioDip').value,
-                clase: Number(document.getElementById('claseDip').value),
-                mes: Number(document.getElementById('mesDip').value),
-                total: Number(document.getElementById('totalDip').value),
-                descuento: Number(document.getElementById('descuentoDip').value),
-                inscripcion: Number(document.getElementById('inscripcionDip').value),
-                documentacion: Number(document.getElementById('docuDip').value),
-                link: document.getElementById('linkDip').value,
+            const id = document.getElementById('editId').value;
+            const type = document.getElementById('itemType').value;
+            
+            let payload = {
+                nombre: document.getElementById('nombreInput').value,
+                link: document.getElementById('linkInput').value,
                 updated: serverTimestamp()
             };
-            if (id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados', id), payload);
-            else await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados'), payload);
-            cerrarModal('diplomado');
+
+            if(type === 'diplomados') {
+                Object.assign(payload, {
+                    duracion: document.getElementById('duracionDip').value,
+                    fechaInicio: document.getElementById('fechaInicioDip').value,
+                    horario: document.getElementById('horarioDip').value,
+                    clase: Number(document.getElementById('claseDip').value),
+                    mes: Number(document.getElementById('mesDip').value),
+                    total: Number(document.getElementById('totalDip').value),
+                    descuento: Number(document.getElementById('descDip').value),
+                    inscripcion: Number(document.getElementById('inscripcionDip').value),
+                    documentacion: Number(document.getElementById('docuDip').value)
+                });
+            } else if(type === 'certificaciones') {
+                Object.assign(payload, {
+                    evaluacion: Number(document.getElementById('costoEvalCert').value),
+                    certificado: Number(document.getElementById('costoCertCert').value)
+                });
+            } else if(type === 'talleres') {
+                Object.assign(payload, {
+                    dias: document.getElementById('diasTal').value,
+                    horario: document.getElementById('horarioTal').value,
+                    costoDia: Number(document.getElementById('costoDiaTal').value),
+                    costoTotal: Number(document.getElementById('costoTotalTal').value)
+                });
+            }
+
+            if (id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', type, id), payload);
+            else await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', type), payload);
+            
+            cerrarModal();
         };
 
         window.switchTab = (tab) => {
-            document.getElementById('tabDip').classList.toggle('active', tab === 'diplomados');
-            // Lógica de pestañas simplificada para este ejemplo
+            currentTab = tab;
+            ['tabDip', 'tabCert', 'tabTal'].forEach(btn => document.getElementById(btn).classList.remove('active'));
+            document.getElementById(tab === 'diplomados' ? 'tabDip' : (tab === 'certificaciones' ? 'tabCert' : 'tabTal')).classList.add('active');
+            
+            ['sec-diplomados', 'sec-certificaciones', 'sec-talleres'].forEach(sec => document.getElementById(sec).classList.add('hidden'));
+            document.getElementById(`sec-${tab}`).classList.remove('hidden');
         };
     </script>
 </body>
