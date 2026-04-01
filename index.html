@@ -10,6 +10,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fff5f7; -webkit-tap-highlight-color: transparent; }
         .pink-gradient { background: linear-gradient(135deg, #ff85a2 0%, #ff4d6d 100%); }
         .blue-gradient { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); }
+        .purple-gradient { background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); }
         .card-shadow { box-shadow: 0 10px 25px -5px rgba(255, 133, 162, 0.1); }
         input, select, textarea { border: 1px solid #ffe4e9; border-radius: 12px; padding: 10px; width: 100%; outline: none; transition: all 0.3s; font-size: 15px; background: white; }
         input:focus, textarea:focus { border-color: #ff85a2; box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.1); }
@@ -31,9 +32,10 @@
             <div class="w-8 h-8 pink-gradient rounded-full flex items-center justify-center text-white font-bold shadow-lg">S</div>
             <h1 class="text-lg font-bold italic text-pink-500">SullyBec.Instituto</h1>
         </div>
-        <div class="flex gap-4">
-            <button onclick="switchTab('diplomados')" id="tabDip" class="px-2 py-1 font-bold text-sm transition-all tab-active">Diplomados</button>
-            <button onclick="switchTab('certificaciones')" id="tabCert" class="px-2 py-1 font-bold text-sm text-gray-400 transition-all">Certificaciones</button>
+        <div class="flex gap-2 md:gap-4">
+            <button onclick="switchTab('diplomados')" id="tabDip" class="px-2 py-1 font-bold text-xs md:text-sm transition-all tab-active">Diplomados</button>
+            <button onclick="switchTab('certificaciones')" id="tabCert" class="px-2 py-1 font-bold text-xs md:text-sm text-gray-400 transition-all">Certificaciones</button>
+            <button onclick="switchTab('talleres')" id="tabTal" class="px-2 py-1 font-bold text-xs md:text-sm text-gray-400 transition-all">Talleres</button>
         </div>
     </nav>
 
@@ -71,6 +73,22 @@
             </div>
             <div id="certGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="col-span-full text-center py-20 text-gray-400">Cargando certificaciones...</div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN TALLERES -->
+        <section id="sec-talleres" class="hidden">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Talleres</h2>
+                    <p class="text-gray-500 text-sm">Cursos cortos y capacitaciones rápidas</p>
+                </div>
+                <button onclick="window.abrirModal('taller')" class="mobile-fab purple-gradient text-white px-6 py-3 rounded-2xl font-bold shadow-lg flex items-center gap-2">
+                    <span class="text-xl">+</span><span>Nuevo Taller</span>
+                </button>
+            </div>
+            <div id="talleresGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="col-span-full text-center py-20 text-gray-400">Cargando talleres...</div>
             </div>
         </section>
     </main>
@@ -142,6 +160,30 @@
         </div>
     </div>
 
+    <!-- MODAL TALLER -->
+    <div id="modal-taller" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[1000] p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl my-auto animate-in zoom-in duration-200">
+            <div class="p-6 border-b border-purple-50 flex justify-between items-center">
+                <h3 id="talModalTitle" class="text-xl font-bold text-purple-600">Nuevo Taller</h3>
+                <button onclick="cerrarModal('taller')" class="text-gray-400 text-3xl">&times;</button>
+            </div>
+            <form id="tallerForm" class="p-6 md:p-8 space-y-4">
+                <input type="hidden" id="editIdTal">
+                <div><label>Nombre del Taller</label><input type="text" id="nombreTal" required></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label>Duración (Horas)</label><input type="text" id="duracionTal" placeholder="Ej. 10 horas totales" required></div>
+                    <div><label>Días / Fechas del Taller</label><input type="text" id="fechaTal" placeholder="Ej. 15 y 16 de mayo o Lun a Vie" required></div>
+                    <div><label>Costo del Taller ($)</label><input type="number" id="costoTal" required></div>
+                    <div><label>Link Drive (Material)</label><input type="url" id="linkTal"></div>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="cerrarModal('taller')" class="flex-1 py-4 font-bold text-gray-400">Cancelar</button>
+                    <button type="submit" id="btnSaveTal" class="flex-1 purple-gradient text-white py-4 rounded-2xl font-bold">Guardar Taller</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL CONFIRMACIÓN ELIMINAR -->
     <div id="modal-delete" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-[3000] p-4">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center">
@@ -178,21 +220,26 @@
 
         const colDip = collection(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados');
         const colCert = collection(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones');
+        const colTal = collection(db, 'artifacts', APP_ID, 'public', 'data', 'talleres');
 
-        let dataDip = [], dataCert = [];
+        let dataDip = [], dataCert = [], dataTal = [];
         let deleteContext = null;
 
         const init = async () => {
             await signInAnonymously(auth);
             listenDip();
             listenCert();
+            listenTal();
         };
 
         window.switchTab = (tab) => {
             document.getElementById('sec-diplomados').classList.toggle('hidden', tab !== 'diplomados');
             document.getElementById('sec-certificaciones').classList.toggle('hidden', tab !== 'certificaciones');
-            document.getElementById('tabDip').className = `px-2 py-1 font-bold text-sm transition-all ${tab === 'diplomados' ? 'tab-active' : 'text-gray-400'}`;
-            document.getElementById('tabCert').className = `px-2 py-1 font-bold text-sm transition-all ${tab === 'certificaciones' ? 'tab-active' : 'text-gray-400'}`;
+            document.getElementById('sec-talleres').classList.toggle('hidden', tab !== 'talleres');
+            
+            document.getElementById('tabDip').className = `px-2 py-1 font-bold text-xs md:text-sm transition-all ${tab === 'diplomados' ? 'tab-active' : 'text-gray-400'}`;
+            document.getElementById('tabCert').className = `px-2 py-1 font-bold text-xs md:text-sm transition-all ${tab === 'certificaciones' ? 'tab-active' : 'text-gray-400'}`;
+            document.getElementById('tabTal').className = `px-2 py-1 font-bold text-xs md:text-sm transition-all ${tab === 'talleres' ? 'tab-active' : 'text-gray-400'}`;
         };
 
         function listenDip() {
@@ -210,7 +257,6 @@
                     const descValue = d.descuento || 0;
                     const totalOriginal = Number(d.costoTotal || 0);
                     const totalConDescuento = totalOriginal - (totalOriginal * (descValue / 100));
-                    
                     const certCost = Number(d.costoCertExtra || 0);
                     const evalCost = Number(d.costoEvalExtra || 0);
                     const totalConCertificacion = totalConDescuento + certCost + evalCost;
@@ -224,25 +270,13 @@
                                     <button onclick="pedirEliminar('diplomado', '${d.id}')" class="p-2 hover:bg-red-50 rounded-lg">🗑️</button>
                                 </div>
                             </div>
-                            
-                            <div class="text-xs font-bold text-pink-400 uppercase tracking-widest mb-4">
-                                ${d.duracion} • Inicio: ${d.fechaInicio}
-                            </div>
-
+                            <div class="text-xs font-bold text-pink-400 uppercase tracking-widest mb-4">${d.duracion} • Inicio: ${d.fechaInicio}</div>
                             <div class="space-y-2 p-4 bg-gray-50/50 rounded-2xl mb-4 text-sm">
                                 <div class="flex justify-between"><span>Inscripción:</span><span class="font-bold">$${d.inscripcion || 0}</span></div>
                                 <div class="flex justify-between"><span>Mensualidad:</span><span class="font-bold">$${d.costoMes || 0}</span></div>
-                                <div class="flex justify-between items-center">
-                                    <span>Descuento Especial:</span>
-                                    <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold text-xs">-${descValue}%</span>
-                                </div>
+                                <div class="flex justify-between items-center"><span>Descuento:</span><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold text-xs">-${descValue}%</span></div>
                             </div>
-
                             <div class="space-y-3 pt-3 border-t border-dashed border-gray-200">
-                                <div class="flex justify-between text-xs text-gray-400">
-                                    <span>Total Sin Descuento:</span>
-                                    <span class="line-through">$${totalOriginal.toLocaleString()}</span>
-                                </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm font-bold text-gray-600">Total Diplomado:</span>
                                     <span class="text-lg font-extrabold text-pink-500">$${totalConDescuento.toLocaleString()}</span>
@@ -252,12 +286,11 @@
                                     <span class="text-lg font-black text-blue-700">$${totalConCertificacion.toLocaleString()}</span>
                                 </div>
                             </div>
-
-                            ${d.temarioLink ? `<a href="${d.temarioLink}" target="_blank" class="mt-4 block w-full py-2 bg-pink-50 text-pink-600 rounded-xl text-center text-xs font-bold hover:bg-pink-100 transition-colors uppercase">Temario Drive</a>` : ''}
+                            ${d.temarioLink ? `<a href="${d.temarioLink}" target="_blank" class="mt-4 block w-full py-2 bg-pink-50 text-pink-600 rounded-xl text-center text-xs font-bold hover:bg-pink-100 transition-colors uppercase tracking-widest">Temario Drive</a>` : ''}
                         </div>
                     `;
                 });
-            });
+            }, err => console.error(err));
         }
 
         function listenCert() {
@@ -265,12 +298,7 @@
                 const grid = document.getElementById('certGrid');
                 grid.innerHTML = '';
                 dataCert = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                
-                if(!dataCert.length) {
-                    grid.innerHTML = '<p class="col-span-full text-center py-10 opacity-50 italic">No hay certificaciones individuales.</p>';
-                    return;
-                }
-
+                if(!dataCert.length) { grid.innerHTML = '<p class="col-span-full text-center py-10 opacity-50 italic">No hay certificaciones.</p>'; return; }
                 dataCert.forEach(c => {
                     grid.innerHTML += `
                         <div class="bg-white p-6 rounded-3xl border border-blue-50 shadow-sm">
@@ -295,11 +323,38 @@
                                 <span class="font-bold text-gray-500 text-sm">Total:</span>
                                 <span class="text-xl font-black text-blue-600">$${(Number(c.costoCert) + Number(c.costoEval)).toLocaleString()}</span>
                             </div>
-                            ${c.linkDrive ? `<a href="${c.linkDrive}" target="_blank" class="block mt-2 text-center text-[10px] font-bold text-blue-400 hover:underline">VER ESTÁNDAR EN DRIVE</a>` : ''}
                         </div>
                     `;
                 });
-            });
+            }, err => console.error(err));
+        }
+
+        function listenTal() {
+            onSnapshot(query(colTal), snap => {
+                const grid = document.getElementById('talleresGrid');
+                grid.innerHTML = '';
+                dataTal = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                if(!dataTal.length) { grid.innerHTML = '<p class="col-span-full text-center py-10 opacity-50 italic">No hay talleres registrados.</p>'; return; }
+                dataTal.forEach(t => {
+                    grid.innerHTML += `
+                        <div class="bg-white p-6 rounded-3xl border border-purple-50 shadow-sm hover:shadow-md transition-all">
+                             <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold text-lg text-purple-900">${t.nombre}</h4>
+                                <div class="flex gap-2">
+                                    <button onclick="abrirModal('taller', '${t.id}')" class="p-1 hover:bg-purple-50 rounded">✏️</button>
+                                    <button onclick="pedirEliminar('taller', '${t.id}')" class="p-1 hover:bg-red-50 rounded">🗑️</button>
+                                </div>
+                            </div>
+                            <div class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4">${t.duracion} • Días: ${t.fecha}</div>
+                            <div class="bg-purple-50/50 p-4 rounded-2xl flex justify-between items-center border border-purple-100">
+                                <span class="font-bold text-purple-600 text-sm">Inversión:</span>
+                                <span class="text-2xl font-black text-purple-700">$${Number(t.costo).toLocaleString()}</span>
+                            </div>
+                            ${t.linkDrive ? `<a href="${t.linkDrive}" target="_blank" class="block mt-4 text-center py-2 bg-purple-600 text-white rounded-xl text-xs font-bold hover:bg-purple-700 transition-colors uppercase tracking-widest shadow-lg shadow-purple-200">Material Drive</a>` : ''}
+                        </div>
+                    `;
+                });
+            }, err => console.error(err));
         }
 
         window.abrirModal = (tipo, id = null) => {
@@ -324,16 +379,30 @@
                     document.getElementById('evalCostDip').value = d.costoEvalExtra || 0;
                     document.getElementById('linkDip').value = d.temarioLink || '';
                 }
-            } else {
+            } else if(tipo === 'certificacion') {
                 const form = document.getElementById('certForm');
                 form.reset();
                 document.getElementById('editIdCert').value = id || '';
+                document.getElementById('certModalTitle').innerText = id ? 'Editar Certificación' : 'Nueva Certificación';
                 if(id) {
                     const c = dataCert.find(x => x.id === id);
                     document.getElementById('nombreCert').value = c.nombre;
                     document.getElementById('costoCert').value = c.costoCert;
                     document.getElementById('evalCert').value = c.costoEval;
                     document.getElementById('linkCert').value = c.linkDrive || '';
+                }
+            } else if(tipo === 'taller') {
+                const form = document.getElementById('tallerForm');
+                form.reset();
+                document.getElementById('editIdTal').value = id || '';
+                document.getElementById('talModalTitle').innerText = id ? 'Editar Taller' : 'Nuevo Taller';
+                if(id) {
+                    const t = dataTal.find(x => x.id === id);
+                    document.getElementById('nombreTal').value = t.nombre;
+                    document.getElementById('duracionTal').value = t.duracion;
+                    document.getElementById('fechaTal').value = t.fecha;
+                    document.getElementById('costoTal').value = t.costo;
+                    document.getElementById('linkTal').value = t.linkDrive || '';
                 }
             }
         };
@@ -348,7 +417,8 @@
         window.confirmarEliminar = async (confirm) => {
             if(confirm && deleteContext) {
                 const { tipo, id } = deleteContext;
-                await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', tipo === 'diplomado' ? 'diplomados' : 'certificaciones', id));
+                const path = tipo === 'diplomado' ? 'diplomados' : tipo === 'certificacion' ? 'certificaciones' : 'talleres';
+                await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', path, id));
                 showStatus("Eliminado exitosamente");
             }
             document.getElementById('modal-delete').style.display = 'none';
@@ -366,7 +436,7 @@
                 inscripcion: Number(document.getElementById('inscripcionDip').value),
                 descuento: Number(document.getElementById('descuentoDip').value),
                 costoClase: Number(document.getElementById('claseDip').value),
-                costoMes: Number(document.getElementById('costoMes').value),
+                costoMes: Number(document.getElementById('mesDip').value),
                 costoTotal: Number(document.getElementById('totalDip').value),
                 costoCertExtra: Number(document.getElementById('certCostDip').value),
                 costoEvalExtra: Number(document.getElementById('evalCostDip').value),
@@ -393,6 +463,23 @@
             else await addDoc(colCert, {...data, created: serverTimestamp()});
             cerrarModal('certificacion');
             showStatus("Certificación guardada");
+        };
+
+        document.getElementById('tallerForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editIdTal').value;
+            const data = {
+                nombre: document.getElementById('nombreTal').value,
+                duracion: document.getElementById('duracionTal').value,
+                fecha: document.getElementById('fechaTal').value,
+                costo: Number(document.getElementById('costoTal').value),
+                linkDrive: document.getElementById('linkTal').value,
+                updated: serverTimestamp()
+            };
+            if(id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'talleres', id), data);
+            else await addDoc(colTal, {...data, created: serverTimestamp()});
+            cerrarModal('taller');
+            showStatus("Taller guardado");
         };
 
         function showStatus(msg) {
