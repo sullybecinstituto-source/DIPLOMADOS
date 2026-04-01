@@ -49,7 +49,6 @@
     </header>
 
     <main class="max-w-6xl mx-auto p-4 pt-6">
-        <!-- SECCIÓN DIPLOMADOS -->
         <section id="sec-diplomados">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-extrabold text-gray-800">Diplomados</h2>
@@ -60,7 +59,6 @@
             <div id="diplomasGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </section>
 
-        <!-- SECCIÓN CERTIFICACIONES -->
         <section id="sec-certificaciones" class="hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-extrabold text-gray-800">Certificaciones</h2>
@@ -71,7 +69,6 @@
             <div id="certGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </section>
 
-        <!-- SECCIÓN TALLERES -->
         <section id="sec-talleres" class="hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-extrabold text-gray-800">Talleres</h2>
@@ -83,7 +80,7 @@
         </section>
     </main>
 
-    <!-- MODAL DIPLOMADO -->
+    <!-- Modales -->
     <div id="modal-diplomado" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-end sm:items-center justify-center z-[1000] p-0 sm:p-4 overflow-y-auto">
         <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-2xl shadow-2xl">
             <div class="p-6 border-b border-pink-50 flex justify-between items-center">
@@ -93,19 +90,16 @@
             <form id="diplomadoForm" class="p-6 space-y-4">
                 <input type="hidden" id="editIdDip">
                 <div><label>Nombre del Diplomado</label><input type="text" id="nombreDip" required></div>
-                
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     <div><label>Duración</label><input type="text" id="duracionDip" placeholder="6 meses"></div>
                     <div><label>Fecha Inicio</label><input type="date" id="fechaInicioDip"></div>
                     <div class="col-span-2 sm:col-span-1"><label>Horario</label><input type="text" id="horarioDip" placeholder="Sábados 9-2"></div>
                 </div>
-
                 <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100">
                     <div class="flex justify-between items-center mb-4">
-                        <span class="text-xs font-bold text-pink-600 uppercase">Costos y Descuentos Detallados</span>
+                        <span class="text-xs font-bold text-pink-600 uppercase">Costos y Descuentos</span>
                         <div class="w-24"><label>Desc. %</label><input type="number" id="descuentoDip" value="0" oninput="recalcDiplomado()" class="py-1 px-2 text-center font-bold"></div>
                     </div>
-                    
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="space-y-1">
                             <label>Clase Individual</label>
@@ -118,26 +112,22 @@
                             <div class="text-[10px] text-pink-400 font-bold px-1" id="resMes">Con desc: $0</div>
                         </div>
                         <div class="space-y-1">
-                            <label>Pago Total Diplomado</label>
+                            <label>Pago Total</label>
                             <input type="number" id="totalDip" oninput="recalcDiplomado()" placeholder="0">
                             <div class="text-[10px] text-pink-400 font-bold px-1" id="resTotal">Con desc: $0</div>
                         </div>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-4">
                     <div><label>Inscripción ($)</label><input type="number" id="inscripcionDip" placeholder="0"></div>
-                    <div><label>Costo Documentación Final ($)</label><input type="number" id="docuDip" placeholder="0"></div>
+                    <div><label>Documentación Final ($)</label><input type="number" id="docuDip" placeholder="0"></div>
                 </div>
-
                 <div><label>Link Temario</label><input type="url" id="linkDip" placeholder="https://drive.google.com/..."></div>
-                
                 <button type="submit" class="w-full pink-gradient text-white py-4 rounded-2xl font-bold shadow-lg mt-2">Guardar Cambios</button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL CERTIFICACIÓN -->
     <div id="modal-certificacion" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-end sm:items-center justify-center z-[1000] p-0 sm:p-4">
         <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-lg shadow-2xl">
             <div class="p-6 border-b border-blue-50 flex justify-between items-center">
@@ -157,7 +147,6 @@
         </div>
     </div>
 
-    <!-- MODAL TALLER -->
     <div id="modal-taller" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-end sm:items-center justify-center z-[1000] p-0 sm:p-4 overflow-y-auto">
         <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-lg shadow-2xl">
             <div class="p-6 border-b border-purple-50 flex justify-between items-center">
@@ -189,97 +178,68 @@
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Firebase Config
         const firebaseConfig = JSON.parse('{"apiKey": "AIzaSyBv4oDOH5mPBN79m_Y47UYa9H1SJ1S7BL8","authDomain": "gestor-de-diplomados.firebaseapp.com","projectId": "gestor-de-diplomados","storageBucket": "gestor-de-diplomados.firebasestorage.app","messagingSenderId": "25065074693","appId": "1:25065074693:web:6541747c26543c709f2c6c"}');
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
         
-        // App Identity
-        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'sullybec-admin-v2';
+        // CORRECCIÓN: Usar el ID original 'sullybec-admin' para recuperar los datos
+        const APP_ID = 'sullybec-admin';
 
         let dataDip = [], dataCert = [], dataTal = [];
         let selectedDates = [];
-        let user = null;
         let subscriptions = [];
 
-        /**
-         * Lógica de Autenticación Segura
-         */
         const runAuthFlow = async () => {
+            onAuthStateChanged(auth, (u) => {
+                if (u) {
+                    document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-green-400";
+                    subscriptions.forEach(unsub => unsub());
+                    subscriptions = [];
+                    setTimeout(() => startDataSubscriptions(), 300);
+                    buildCalendar();
+                } else {
+                    document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-yellow-400";
+                }
+            });
+
             try {
-                // Paso 1: Intentar iniciar sesión antes de registrar el listener
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
+                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (token) {
+                    await signInWithCustomToken(auth, token).catch(async () => {
+                        await signInAnonymously(auth);
+                    });
                 } else {
                     await signInAnonymously(auth);
                 }
-                
-                // Paso 2: Solo después de que el método de login sea llamado, escuchamos el cambio
-                onAuthStateChanged(auth, (u) => {
-                    if (u) {
-                        user = u;
-                        document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-green-400";
-                        
-                        // Limpieza de suscripciones previas
-                        subscriptions.forEach(unsub => unsub());
-                        subscriptions = [];
-                        
-                        // Iniciar datos con una pequeña pausa para asegurar que el token sea propagado
-                        setTimeout(() => startDataSubscriptions(), 100);
-                        buildCalendar();
-                    } else {
-                        document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-yellow-400";
-                    }
-                });
             } catch (err) {
-                console.error("Critical Auth Error:", err);
+                try { await signInAnonymously(auth); } catch(e) {}
             }
         };
 
         function startDataSubscriptions() {
-            // Regla de Oro: Nunca consultar sin usuario activo
-            if (!auth.currentUser) {
-                console.warn("Subscriptions delayed: No current user detected yet.");
-                return;
-            }
+            if (!auth.currentUser) return;
+            const path = (coll) => collection(db, 'artifacts', APP_ID, 'public', 'data', coll);
 
-            console.log("Initializing secure data streams for:", auth.currentUser.uid);
+            subscriptions.push(onSnapshot(path('diplomados'), snap => {
+                dataDip = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderDip();
+            }, e => console.error("Error Dip:", e)));
 
-            const colDip = collection(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados');
-            const colCert = collection(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones');
-            const colTal = collection(db, 'artifacts', APP_ID, 'public', 'data', 'talleres');
+            subscriptions.push(onSnapshot(path('certificaciones'), snap => {
+                dataCert = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderCert();
+            }, e => console.error("Error Cert:", e)));
 
-            // Suscripciones con manejo de errores robusto
-            subscriptions.push(
-                onSnapshot(colDip, snap => {
-                    dataDip = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    renderDip();
-                }, err => {
-                    console.error("Error Diplomados Snapshot:", err.message);
-                })
-            );
-
-            subscriptions.push(
-                onSnapshot(colCert, snap => {
-                    dataCert = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    renderCert();
-                }, err => console.error("Error Certificados Snapshot:", err.message))
-            );
-
-            subscriptions.push(
-                onSnapshot(colTal, snap => {
-                    dataTal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    renderTal();
-                }, err => console.error("Error Talleres Snapshot:", err.message))
-            );
+            subscriptions.push(onSnapshot(path('talleres'), snap => {
+                dataTal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderTal();
+            }, e => console.error("Error Tal:", e)));
         }
 
-        // Ejecutar flujo de inicio
         runAuthFlow();
 
-        // --- UI & Business Logic ---
-
+        // UI Handlers
         window.switchTab = (tab) => {
             ['diplomados', 'certificaciones', 'talleres'].forEach(k => {
                 const section = document.getElementById(`sec-${k}`);
@@ -305,30 +265,27 @@
 
         window.abrirModal = (tipo, id = null) => {
             const modal = document.getElementById(`modal-${tipo}`);
-            const form = document.getElementById(`${tipo}Form`);
-            if(!modal || !form) return;
-            
+            if(!modal) return;
             modal.style.display = 'flex';
+            const form = document.getElementById(`${tipo}Form`);
             form.reset();
             const editIdInput = document.getElementById(`editId${tipo === 'diplomado' ? 'Dip' : tipo === 'certificacion' ? 'Cert' : 'Tal'}`);
             if(editIdInput) editIdInput.value = id || '';
 
-            if (tipo === 'diplomado') {
-                if (id) {
-                    const d = dataDip.find(x => x.id === id);
-                    if (d) {
-                        document.getElementById('nombreDip').value = d.nombre || '';
-                        document.getElementById('duracionDip').value = d.duracion || '';
-                        document.getElementById('fechaInicioDip').value = d.fechaInicio || '';
-                        document.getElementById('horarioDip').value = d.horario || '';
-                        document.getElementById('claseDip').value = d.clase || 0;
-                        document.getElementById('mesDip').value = d.mes || 0;
-                        document.getElementById('totalDip').value = d.total || 0;
-                        document.getElementById('descuentoDip').value = d.descuento || 0;
-                        document.getElementById('inscripcionDip').value = d.inscripcion || 0;
-                        document.getElementById('docuDip').value = d.documentacion || 0;
-                        document.getElementById('linkDip').value = d.link || '';
-                    }
+            if (tipo === 'diplomado' && id) {
+                const d = dataDip.find(x => x.id === id);
+                if (d) {
+                    document.getElementById('nombreDip').value = d.nombre || '';
+                    document.getElementById('duracionDip').value = d.duracion || '';
+                    document.getElementById('fechaInicioDip').value = d.fechaInicio || '';
+                    document.getElementById('horarioDip').value = d.horario || '';
+                    document.getElementById('claseDip').value = d.clase || 0;
+                    document.getElementById('mesDip').value = d.mes || 0;
+                    document.getElementById('totalDip').value = d.total || 0;
+                    document.getElementById('descuentoDip').value = d.descuento || 0;
+                    document.getElementById('inscripcionDip').value = d.inscripcion || 0;
+                    document.getElementById('docuDip').value = d.documentacion || 0;
+                    document.getElementById('linkDip').value = d.link || '';
                 }
                 recalcDiplomado();
             } else if (tipo === 'taller') {
@@ -342,8 +299,7 @@
                         selectedDates = t.fechas || [];
                     }
                 }
-                updateCalendarUI();
-                recalcTaller();
+                updateCalendarUI(); recalcTaller();
             } else if (tipo === 'certificacion' && id) {
                 const c = dataCert.find(x => x.id === id);
                 if (c) {
@@ -355,18 +311,12 @@
             }
         };
 
-        window.cerrarModal = (tipo) => {
-            const modal = document.getElementById(`modal-${tipo}`);
-            if(modal) modal.style.display = 'none';
-        };
+        window.cerrarModal = (tipo) => { document.getElementById(`modal-${tipo}`).style.display = 'none'; };
 
         function renderDip() {
             const grid = document.getElementById('diplomasGrid');
-            if(!grid) return;
             grid.innerHTML = dataDip.map(d => {
-                const desc = d.descuento || 0;
-                const totalConDesc = d.total - (d.total * (desc / 100));
-                const docu = Number(d.documentacion || 0);
+                const totalConDesc = d.total - (d.total * ((d.descuento || 0) / 100));
                 return `
                 <div class="bg-white p-5 rounded-3xl border border-pink-50 shadow-sm relative">
                     <div class="flex justify-between items-start mb-2">
@@ -376,19 +326,10 @@
                             <button onclick="borrar('diplomados', '${d.id}')" class="text-xs p-1 opacity-20">🗑️</button>
                         </div>
                     </div>
-                    <div class="flex flex-wrap gap-2 mb-4">
-                        <span class="text-[9px] font-bold bg-pink-50 text-pink-500 px-2 py-1 rounded-lg uppercase">${d.duracion || 'Sin duración'}</span>
-                        <span class="text-[9px] font-bold bg-gray-50 text-gray-400 px-2 py-1 rounded-lg uppercase">🕒 ${d.horario || 'S/H'}</span>
-                    </div>
-                    <div class="space-y-2 pt-2 border-t border-pink-50">
-                        <div class="flex justify-between text-[11px]">
-                            <span class="text-gray-400">Pago Total Diplomado:</span>
-                            <span class="font-bold text-pink-600">$${totalConDesc.toLocaleString()}</span>
-                        </div>
-                        <div class="flex justify-between text-[11px]">
-                            <span class="text-gray-400">Documentación Final:</span>
-                            <span class="font-bold text-gray-600">$${docu.toLocaleString()}</span>
-                        </div>
+                    <div class="text-[10px] text-pink-500 font-bold mb-4 uppercase">${d.duracion || '6 meses'} • ${d.horario || 'S/H'}</div>
+                    <div class="flex justify-between text-xs border-t pt-3 border-pink-50">
+                        <span class="text-gray-400 font-medium">Costo Final:</span>
+                        <span class="font-black text-pink-600">$${totalConDesc.toLocaleString()}</span>
                     </div>
                 </div>`;
             }).join('');
@@ -396,7 +337,6 @@
 
         function renderCert() {
             const grid = document.getElementById('certGrid');
-            if(!grid) return;
             grid.innerHTML = dataCert.map(c => `
                 <div class="bg-white p-5 rounded-3xl border border-blue-50 shadow-sm">
                     <div class="flex justify-between items-start mb-3">
@@ -409,33 +349,23 @@
 
         function renderTal() {
             const grid = document.getElementById('talleresGrid');
-            if(!grid) return;
             grid.innerHTML = dataTal.map(t => `
                 <div class="bg-white p-5 rounded-3xl border border-purple-50 shadow-sm">
                     <div class="flex justify-between items-start mb-2">
                         <h4 class="font-bold text-gray-800">${t.nombre}</h4>
                         <button onclick="abrirModal('taller', '${t.id}')" class="text-xs">✏️</button>
                     </div>
-                    <div class="text-[10px] text-gray-400 font-bold mb-2 uppercase">🕒 ${t.horario || 'Sin horario'}</div>
                     <div class="text-xl font-black text-purple-600">$${Number(t.costo || 0).toLocaleString()}</div>
                 </div>`).join('');
         }
 
-        window.borrar = async (colName, id) => {
-            if (!auth.currentUser) return;
-            if (confirm('¿Borrar este elemento?')) {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', colName, id));
-                } catch (err) {
-                    console.error("Error al borrar:", err);
-                }
-            }
+        window.borrar = async (col, id) => {
+            if (!auth.currentUser || !confirm('¿Borrar?')) return;
+            await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', col, id));
         };
 
-        // Form Handlers
         document.getElementById('diplomadoForm').onsubmit = async (e) => {
             e.preventDefault();
-            if (!auth.currentUser) return;
             const id = document.getElementById('editIdDip').value;
             const payload = {
                 nombre: document.getElementById('nombreDip').value,
@@ -451,16 +381,13 @@
                 link: document.getElementById('linkDip').value,
                 updated: serverTimestamp()
             };
-            try {
-                if (id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados', id), payload);
-                else await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados'), payload);
-                cerrarModal('diplomado');
-            } catch (err) { console.error("Error Diplomado Form:", err); }
+            if (id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados', id), payload);
+            else await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados'), payload);
+            cerrarModal('diplomado');
         };
 
         document.getElementById('tallerForm').onsubmit = async (e) => {
             e.preventDefault();
-            if (!auth.currentUser) return;
             const id = document.getElementById('editIdTal').value;
             const cost = (Number(document.getElementById('costoPorDiaTal').value) || 0) * selectedDates.length;
             const payload = {
@@ -471,16 +398,13 @@
                 costo: cost,
                 updated: serverTimestamp()
             };
-            try {
-                if (id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'talleres', id), payload);
-                else await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'talleres'), payload);
-                cerrarModal('taller');
-            } catch (err) { console.error("Error Taller Form:", err); }
+            if (id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'talleres', id), payload);
+            else await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'talleres'), payload);
+            cerrarModal('taller');
         };
 
         document.getElementById('certificacionForm').onsubmit = async (e) => {
             e.preventDefault();
-            if (!auth.currentUser) return;
             const id = document.getElementById('editIdCert').value;
             const payload = {
                 nombre: document.getElementById('nombreCert').value,
@@ -489,19 +413,14 @@
                 link: document.getElementById('linkCert').value,
                 updated: serverTimestamp()
             };
-            try {
-                if (id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones', id), payload);
-                else await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones'), payload);
-                cerrarModal('certificacion');
-            } catch (err) { console.error("Error Certificación Form:", err); }
+            if (id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones', id), payload);
+            else await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones'), payload);
+            cerrarModal('certificacion');
         };
 
-        // Calendar Helpers
         function buildCalendar() {
             const grid = document.getElementById('calendarGrid');
-            if (!grid) return;
-            const d = new Date();
-            const days = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+            const days = new Date(2025, 5, 0).getDate(); 
             grid.innerHTML = '';
             for (let i = 1; i <= days; i++) {
                 const date = `2025-05-${String(i).padStart(2, '0')}`;
@@ -509,22 +428,20 @@
                 div.className = 'calendar-day';
                 div.dataset.date = date;
                 div.innerText = i;
-                div.onclick = () => toggleDate(date);
+                div.onclick = () => {
+                    const idx = selectedDates.indexOf(date);
+                    if (idx > -1) selectedDates.splice(idx, 1); else selectedDates.push(date);
+                    updateCalendarUI(); recalcTaller();
+                };
                 grid.appendChild(div);
             }
         }
-        window.toggleDate = (date) => {
-            const idx = selectedDates.indexOf(date);
-            if (idx > -1) selectedDates.splice(idx, 1); else selectedDates.push(date);
-            updateCalendarUI(); recalcTaller();
-        };
         function updateCalendarUI() { document.querySelectorAll('.calendar-day').forEach(el => el.classList.toggle('selected', selectedDates.includes(el.dataset.date))); }
         window.recalcTaller = () => {
             const total = (Number(document.getElementById('costoPorDiaTal').value) || 0) * selectedDates.length;
             document.getElementById('talSummary').innerText = `${selectedDates.length} días`;
             document.getElementById('totalTallerDisplay').innerText = `$${total.toLocaleString()}`;
         };
-
     </script>
 </body>
 </html>
