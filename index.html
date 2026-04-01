@@ -13,17 +13,16 @@
         .purple-gradient { background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); }
         
         .nav-container { background: #fee2e7; border-radius: 20px; padding: 4px; display: flex; gap: 4px; }
-        .nav-btn { flex: 1; padding: 10px 5px; border-radius: 16px; font-weight: 700; font-size: 13px; transition: all 0.3s; color: #ff85a2; text-align: center; }
+        .nav-btn { flex: 1; padding: 10px 5px; border-radius: 16px; font-weight: 700; font-size: 13px; transition: all 0.3s; color: #ff85a2; text-align: center; border: none; cursor: pointer; }
         .nav-btn.active { background: white; color: #ff4d6d; box-shadow: 0 4px 10px rgba(255, 77, 109, 0.1); }
+
+        input, select, textarea { border: 1px solid #ffe4e9; border-radius: 14px; padding: 12px; width: 100%; outline: none; transition: all 0.3s; font-size: 16px; background: white; }
+        input:focus { border-color: #ff85a2; box-shadow: 0 0 0 4px rgba(255, 133, 162, 0.1); }
+        label { display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-bottom: 4px; text-transform: uppercase; margin-left: 4px; }
 
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
         .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; cursor: pointer; border: 1px solid #f1f5f9; transition: all 0.2s; }
         .calendar-day.selected { background: #a855f7; color: white; border-color: #7e22ce; font-weight: bold; }
-        .calendar-day:empty { visibility: hidden; }
-
-        input, select, textarea { border: 1px solid #ffe4e9; border-radius: 14px; padding: 12px; width: 100%; outline: none; transition: all 0.3s; font-size: 16px; background: white; }
-        input:focus { border-color: #ff85a2; ring: 2px ring-pink-100; }
-        label { display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-bottom: 4px; text-transform: uppercase; margin-left: 4px; }
 
         @media (max-width: 640px) {
             .mobile-fab { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; z-index: 999; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(255, 77, 109, 0.4); }
@@ -38,7 +37,7 @@
                     <div class="w-8 h-8 pink-gradient rounded-xl flex items-center justify-center text-white font-bold shadow-sm text-sm">S</div>
                     <span class="font-bold text-pink-500 tracking-tight">SullyBec Admin</span>
                 </div>
-                <div id="status-dot" class="w-2 h-2 rounded-full bg-green-400"></div>
+                <div id="status-dot" class="w-2 h-2 rounded-full bg-yellow-400"></div>
             </div>
             
             <div class="nav-container">
@@ -86,46 +85,54 @@
 
     <!-- MODAL DIPLOMADO -->
     <div id="modal-diplomado" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-end sm:items-center justify-center z-[1000] p-0 sm:p-4 overflow-y-auto">
-        <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-xl shadow-2xl">
+        <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-2xl shadow-2xl">
             <div class="p-6 border-b border-pink-50 flex justify-between items-center">
-                <h3 id="dipModalTitle" class="text-lg font-bold text-pink-600">Datos del Diplomado</h3>
+                <h3 class="text-lg font-bold text-pink-600">Configuración del Diplomado</h3>
                 <button onclick="cerrarModal('diplomado')" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 font-bold">&times;</button>
             </div>
             <form id="diplomadoForm" class="p-6 space-y-4">
                 <input type="hidden" id="editIdDip">
-                <div><label>Nombre</label><input type="text" id="nombreDip" placeholder="Nombre del Diplomado" required></div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label>Duración</label><input type="text" id="duracionDip" placeholder="Ej. 6 meses"></div>
-                    <div><label>Fecha Inicio</label><input type="date" id="fechaInicioDip"></div>
-                </div>
-                <!-- CAMPO HORARIO DIPLOMADO -->
-                <div><label>Horario</label><input type="text" id="horarioDip" placeholder="Ej. Sábados 9am a 2pm"></div>
+                <div><label>Nombre del Diplomado</label><input type="text" id="nombreDip" required></div>
                 
-                <div class="bg-pink-50/50 p-4 rounded-2xl space-y-3">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div><label>Inversión Base ($)</label><input type="number" id="totalDip" oninput="recalcDiplomado()" placeholder="Total sin descuento" required></div>
-                        <div><label>Descuento (%)</label><input type="number" id="descuentoDip" oninput="recalcDiplomado()" placeholder="0"></div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div><label>Duración</label><input type="text" id="duracionDip" placeholder="6 meses"></div>
+                    <div><label>Fecha Inicio</label><input type="date" id="fechaInicioDip"></div>
+                    <div class="col-span-2 sm:col-span-1"><label>Horario</label><input type="text" id="horarioDip" placeholder="Sábados 9-2"></div>
+                </div>
+
+                <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-xs font-bold text-pink-600 uppercase">Costos y Descuentos Detallados</span>
+                        <div class="w-24"><label>Desc. %</label><input type="number" id="descuentoDip" value="0" oninput="recalcDiplomado()" class="py-1 px-2 text-center font-bold"></div>
                     </div>
-                    <div class="flex justify-between items-center pt-2">
-                        <div>
-                            <span class="text-[10px] font-bold text-pink-400 uppercase">Precio con descuento:</span>
-                            <div class="text-xl font-black text-pink-600" id="finalPriceDip">$0</div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="space-y-1">
+                            <label>Clase Individual</label>
+                            <input type="number" id="claseDip" oninput="recalcDiplomado()" placeholder="0">
+                            <div class="text-[10px] text-pink-400 font-bold px-1" id="resClase">Con desc: $0</div>
                         </div>
-                        <div class="text-right">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase">Ahorro:</span>
-                            <div class="text-sm font-bold text-green-500" id="savingsDip">$0</div>
+                        <div class="space-y-1">
+                            <label>Mensualidad</label>
+                            <input type="number" id="mesDip" oninput="recalcDiplomado()" placeholder="0">
+                            <div class="text-[10px] text-pink-400 font-bold px-1" id="resMes">Con desc: $0</div>
+                        </div>
+                        <div class="space-y-1">
+                            <label>Pago Total Diplomado</label>
+                            <input type="number" id="totalDip" oninput="recalcDiplomado()" placeholder="0">
+                            <div class="text-[10px] text-pink-400 font-bold px-1" id="resTotal">Con desc: $0</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-3">
-                    <div><label>Inscripción</label><input type="number" id="inscripcionDip" placeholder="0"></div>
-                    <div><label>Mensualidad</label><input type="number" id="mesDip" placeholder="0"></div>
-                    <div><label>Clase Indiv.</label><input type="number" id="claseDip" placeholder="0"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label>Inscripción ($)</label><input type="number" id="inscripcionDip" placeholder="0"></div>
+                    <div><label>Costo Documentación Final ($)</label><input type="number" id="docuDip" placeholder="0"></div>
                 </div>
+
+                <div><label>Link Temario</label><input type="url" id="linkDip" placeholder="https://drive.google.com/..."></div>
                 
-                <div><label>Link Drive (Temario)</label><input type="url" id="linkDip" placeholder="https://..."></div>
-                <button type="submit" class="w-full pink-gradient text-white py-4 rounded-2xl font-bold shadow-lg mt-2">Guardar Diplomado</button>
+                <button type="submit" class="w-full pink-gradient text-white py-4 rounded-2xl font-bold shadow-lg mt-2">Guardar Cambios</button>
             </form>
         </div>
     </div>
@@ -139,12 +146,12 @@
             </div>
             <form id="certificacionForm" class="p-6 space-y-4">
                 <input type="hidden" id="editIdCert">
-                <div><label>Nombre Estándar</label><input type="text" id="nombreCert" placeholder="Ej. EC0301" required></div>
+                <div><label>Nombre Estándar</label><input type="text" id="nombreCert" required></div>
                 <div class="grid grid-cols-2 gap-3">
                     <div><label>Costo Certificado</label><input type="number" id="costoCert" placeholder="0"></div>
                     <div><label>Costo Evaluación</label><input type="number" id="evalCert" placeholder="0"></div>
                 </div>
-                <div><label>Link Drive</label><input type="url" id="linkCert" placeholder="https://..."></div>
+                <div><label>Link Drive</label><input type="url" id="linkCert"></div>
                 <button type="submit" class="w-full blue-gradient text-white py-4 rounded-2xl font-bold shadow-lg">Guardar Certificación</button>
             </form>
         </div>
@@ -154,33 +161,24 @@
     <div id="modal-taller" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-end sm:items-center justify-center z-[1000] p-0 sm:p-4 overflow-y-auto">
         <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-lg shadow-2xl">
             <div class="p-6 border-b border-purple-50 flex justify-between items-center">
-                <h3 id="talModalTitle" class="text-lg font-bold text-purple-600">Configurar Taller</h3>
+                <h3 class="text-lg font-bold text-purple-600">Configurar Taller</h3>
                 <button onclick="cerrarModal('taller')" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 font-bold">&times;</button>
             </div>
-            <form id="tallerForm" class="p-6 space-y-5">
+            <form id="tallerForm" class="p-6 space-y-4">
                 <input type="hidden" id="editIdTal">
-                <div><label>Nombre del Taller</label><input type="text" id="nombreTal" placeholder="Ej. Automaquillaje" required></div>
+                <div><label>Nombre del Taller</label><input type="text" id="nombreTal" required></div>
                 <div class="bg-purple-50/50 p-4 rounded-2xl border border-purple-100">
-                    <label class="text-purple-600">Seleccionar Días</label>
-                    <div id="calMonthName" class="text-center font-bold text-xs mb-2 text-gray-500 uppercase">Mes Actual</div>
+                    <div id="calMonthName" class="text-center font-bold text-xs mb-2 text-gray-500 uppercase">Mayo 2025</div>
                     <div class="calendar-grid mb-2" id="calendarGrid"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label>Costo por Día ($)</label><input type="number" id="costoPorDiaTal" placeholder="0" oninput="recalcTaller()"></div>
-                    <div><label>Horas por Día</label><input type="text" id="horasTal" placeholder="Ej. 3h"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label>Costo por Día ($)</label><input type="number" id="costoPorDiaTal" oninput="recalcTaller()"></div>
+                    <div><label>Horas / Horario</label><input type="text" id="horarioTal" placeholder="4pm a 7pm"></div>
                 </div>
-                <!-- CAMPO HORARIO TALLER -->
-                <div><label>Horario</label><input type="text" id="horarioTal" placeholder="Ej. 4pm a 7pm"></div>
-
-                <div class="bg-purple-600 p-4 rounded-2xl flex justify-between items-center shadow-lg">
-                    <div>
-                        <div class="text-[10px] text-purple-200 font-bold uppercase">Inversión Final</div>
-                        <div class="text-xs text-white opacity-80" id="talSummary">0 días seleccionados</div>
-                    </div>
-                    <div class="text-2xl font-black text-white" id="totalTallerDisplay">$0</div>
-                    <input type="hidden" id="costoTal">
+                <div class="bg-purple-600 p-4 rounded-2xl flex justify-between items-center text-white">
+                    <div class="text-xs font-bold uppercase" id="talSummary">0 días</div>
+                    <div class="text-2xl font-black" id="totalTallerDisplay">$0</div>
                 </div>
-                <div><label>Link Drive</label><input type="url" id="linkTal" placeholder="https://..."></div>
                 <button type="submit" class="w-full purple-gradient text-white py-4 rounded-2xl font-bold shadow-lg">Guardar Taller</button>
             </form>
         </div>
@@ -189,177 +187,207 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // Firebase Config
         const firebaseConfig = JSON.parse('{"apiKey": "AIzaSyBv4oDOH5mPBN79m_Y47UYa9H1SJ1S7BL8","authDomain": "gestor-de-diplomados.firebaseapp.com","projectId": "gestor-de-diplomados","storageBucket": "gestor-de-diplomados.firebasestorage.app","messagingSenderId": "25065074693","appId": "1:25065074693:web:6541747c26543c709f2c6c"}');
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const APP_ID = 'sullybec-admin';
-
-        const colDip = collection(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados');
-        const colCert = collection(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones');
-        const colTal = collection(db, 'artifacts', APP_ID, 'public', 'data', 'talleres');
+        
+        // App Identity
+        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'sullybec-admin-v2';
 
         let dataDip = [], dataCert = [], dataTal = [];
         let selectedDates = [];
+        let user = null;
+        let subscriptions = [];
 
-        const init = async () => {
-            await signInAnonymously(auth);
-            listenAll();
-            buildCalendar();
+        /**
+         * Lógica de Autenticación Segura
+         */
+        const runAuthFlow = async () => {
+            try {
+                // Paso 1: Intentar iniciar sesión antes de registrar el listener
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                // Paso 2: Solo después de que el método de login sea llamado, escuchamos el cambio
+                onAuthStateChanged(auth, (u) => {
+                    if (u) {
+                        user = u;
+                        document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-green-400";
+                        
+                        // Limpieza de suscripciones previas
+                        subscriptions.forEach(unsub => unsub());
+                        subscriptions = [];
+                        
+                        // Iniciar datos con una pequeña pausa para asegurar que el token sea propagado
+                        setTimeout(() => startDataSubscriptions(), 100);
+                        buildCalendar();
+                    } else {
+                        document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-yellow-400";
+                    }
+                });
+            } catch (err) {
+                console.error("Critical Auth Error:", err);
+            }
         };
 
-        const listenAll = () => {
-            onSnapshot(colDip, snap => { dataDip = snap.docs.map(d => ({id: d.id, ...d.data()})); renderDip(); });
-            onSnapshot(colCert, snap => { dataCert = snap.docs.map(d => ({id: d.id, ...d.data()})); renderCert(); });
-            onSnapshot(colTal, snap => { dataTal = snap.docs.map(d => ({id: d.id, ...d.data()})); renderTal(); });
-        };
+        function startDataSubscriptions() {
+            // Regla de Oro: Nunca consultar sin usuario activo
+            if (!auth.currentUser) {
+                console.warn("Subscriptions delayed: No current user detected yet.");
+                return;
+            }
+
+            console.log("Initializing secure data streams for:", auth.currentUser.uid);
+
+            const colDip = collection(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados');
+            const colCert = collection(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones');
+            const colTal = collection(db, 'artifacts', APP_ID, 'public', 'data', 'talleres');
+
+            // Suscripciones con manejo de errores robusto
+            subscriptions.push(
+                onSnapshot(colDip, snap => {
+                    dataDip = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    renderDip();
+                }, err => {
+                    console.error("Error Diplomados Snapshot:", err.message);
+                })
+            );
+
+            subscriptions.push(
+                onSnapshot(colCert, snap => {
+                    dataCert = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    renderCert();
+                }, err => console.error("Error Certificados Snapshot:", err.message))
+            );
+
+            subscriptions.push(
+                onSnapshot(colTal, snap => {
+                    dataTal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    renderTal();
+                }, err => console.error("Error Talleres Snapshot:", err.message))
+            );
+        }
+
+        // Ejecutar flujo de inicio
+        runAuthFlow();
+
+        // --- UI & Business Logic ---
 
         window.switchTab = (tab) => {
             ['diplomados', 'certificaciones', 'talleres'].forEach(k => {
-                const el = document.getElementById(`sec-${k}`);
-                if (el) el.classList.toggle('hidden', k !== tab);
+                const section = document.getElementById(`sec-${k}`);
+                if(section) section.classList.toggle('hidden', k !== tab);
             });
             document.getElementById('tabDip').classList.toggle('active', tab === 'diplomados');
             document.getElementById('tabCert').classList.toggle('active', tab === 'certificaciones');
             document.getElementById('tabTal').classList.toggle('active', tab === 'talleres');
         };
 
+        window.recalcDiplomado = () => {
+            const desc = Number(document.getElementById('descuentoDip').value) || 0;
+            const vals = {
+                clase: Number(document.getElementById('claseDip').value) || 0,
+                mes: Number(document.getElementById('mesDip').value) || 0,
+                total: Number(document.getElementById('totalDip').value) || 0
+            };
+            const apply = (val) => Math.max(0, val - (val * (desc / 100))).toLocaleString();
+            document.getElementById('resClase').innerText = `Con desc: $${apply(vals.clase)}`;
+            document.getElementById('resMes').innerText = `Con desc: $${apply(vals.mes)}`;
+            document.getElementById('resTotal').innerText = `Con desc: $${apply(vals.total)}`;
+        };
+
         window.abrirModal = (tipo, id = null) => {
             const modal = document.getElementById(`modal-${tipo}`);
             const form = document.getElementById(`${tipo}Form`);
-            if (!modal || !form) return;
-
+            if(!modal || !form) return;
+            
             modal.style.display = 'flex';
             form.reset();
-            
-            const editIdInput = document.getElementById(`editId${tipo.charAt(0).toUpperCase() + tipo.slice(1,3)}`);
-            if (editIdInput) editIdInput.value = id || '';
+            const editIdInput = document.getElementById(`editId${tipo === 'diplomado' ? 'Dip' : tipo === 'certificacion' ? 'Cert' : 'Tal'}`);
+            if(editIdInput) editIdInput.value = id || '';
 
-            if(tipo === 'diplomado') {
-                if(id) {
+            if (tipo === 'diplomado') {
+                if (id) {
                     const d = dataDip.find(x => x.id === id);
                     if (d) {
                         document.getElementById('nombreDip').value = d.nombre || '';
                         document.getElementById('duracionDip').value = d.duracion || '';
                         document.getElementById('fechaInicioDip').value = d.fechaInicio || '';
-                        document.getElementById('horarioDip').value = d.horario || ''; // Recuperar horario
-                        document.getElementById('inscripcionDip').value = d.inscripcion || 0;
+                        document.getElementById('horarioDip').value = d.horario || '';
+                        document.getElementById('claseDip').value = d.clase || 0;
+                        document.getElementById('mesDip').value = d.mes || 0;
+                        document.getElementById('totalDip').value = d.total || 0;
                         document.getElementById('descuentoDip').value = d.descuento || 0;
-                        document.getElementById('claseDip').value = d.costoClase || 0;
-                        document.getElementById('mesDip').value = d.costoMes || 0;
-                        document.getElementById('totalDip').value = d.costoTotal || 0;
-                        document.getElementById('linkDip').value = d.temarioLink || '';
+                        document.getElementById('inscripcionDip').value = d.inscripcion || 0;
+                        document.getElementById('docuDip').value = d.documentacion || 0;
+                        document.getElementById('linkDip').value = d.link || '';
                     }
                 }
                 recalcDiplomado();
-            } else if(tipo === 'certificacion' && id) {
+            } else if (tipo === 'taller') {
+                selectedDates = [];
+                if (id) {
+                    const t = dataTal.find(x => x.id === id);
+                    if (t) {
+                        document.getElementById('nombreTal').value = t.nombre || '';
+                        document.getElementById('costoPorDiaTal').value = t.costoDia || 0;
+                        document.getElementById('horarioTal').value = t.horario || '';
+                        selectedDates = t.fechas || [];
+                    }
+                }
+                updateCalendarUI();
+                recalcTaller();
+            } else if (tipo === 'certificacion' && id) {
                 const c = dataCert.find(x => x.id === id);
                 if (c) {
                     document.getElementById('nombreCert').value = c.nombre || '';
                     document.getElementById('costoCert').value = c.costoCert || 0;
                     document.getElementById('evalCert').value = c.costoEval || 0;
-                    document.getElementById('linkCert').value = c.linkDrive || '';
+                    document.getElementById('linkCert').value = c.link || '';
                 }
-            } else if(tipo === 'taller') {
-                selectedDates = [];
-                if(id) {
-                    const t = dataTal.find(x => x.id === id);
-                    if (t) {
-                        document.getElementById('nombreTal').value = t.nombre || '';
-                        document.getElementById('costoPorDiaTal').value = t.costoPorDia || 0;
-                        document.getElementById('horasTal').value = t.horasPorDia || '';
-                        document.getElementById('horarioTal').value = t.horario || ''; // Recuperar horario
-                        document.getElementById('linkTal').value = t.linkDrive || '';
-                        selectedDates = t.fechasArray || [];
-                    }
-                }
-                updateCalendarUI();
-                recalcTaller();
             }
         };
 
         window.cerrarModal = (tipo) => {
             const modal = document.getElementById(`modal-${tipo}`);
-            if (modal) modal.style.display = 'none';
-        };
-
-        window.recalcDiplomado = () => {
-            const total = Number(document.getElementById('totalDip').value) || 0;
-            const desc = Number(document.getElementById('descuentoDip').value) || 0;
-            const final = total - (total * (desc / 100));
-            const savings = total - final;
-            
-            document.getElementById('finalPriceDip').innerText = `$${final.toLocaleString()}`;
-            document.getElementById('savingsDip').innerText = `-$${savings.toLocaleString()}`;
-        };
-
-        function buildCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            if (!grid) return;
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth();
-            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            document.getElementById('calMonthName').innerText = `${monthNames[month]} ${year}`;
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            grid.innerHTML = '';
-            ['D','L','M','M','J','V','S'].forEach(d => grid.innerHTML += `<div class="text-center font-bold text-[9px] text-gray-300 pb-1">${d}</div>`);
-            for(let i=0; i<firstDay; i++) grid.innerHTML += '<div></div>';
-            for(let d=1; d<=daysInMonth; d++) {
-                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                grid.innerHTML += `<div class="calendar-day" data-date="${dateStr}" onclick="toggleDate('${dateStr}')">${d}</div>`;
-            }
-        }
-
-        window.toggleDate = (date) => {
-            const idx = selectedDates.indexOf(date);
-            if(idx > -1) selectedDates.splice(idx, 1);
-            else selectedDates.push(date);
-            updateCalendarUI();
-            recalcTaller();
-        };
-
-        function updateCalendarUI() {
-            document.querySelectorAll('.calendar-day').forEach(el => el.classList.toggle('selected', selectedDates.includes(el.dataset.date)));
-        }
-
-        window.recalcTaller = () => {
-            const costoDia = Number(document.getElementById('costoPorDiaTal').value) || 0;
-            const total = costoDia * selectedDates.length;
-            const summary = document.getElementById('talSummary');
-            if(summary) summary.innerText = `${selectedDates.length} día(s) seleccionados`;
-            const display = document.getElementById('totalTallerDisplay');
-            if(display) display.innerText = `$${total.toLocaleString()}`;
-            const input = document.getElementById('costoTal');
-            if(input) input.value = total;
+            if(modal) modal.style.display = 'none';
         };
 
         function renderDip() {
             const grid = document.getElementById('diplomasGrid');
+            if(!grid) return;
             grid.innerHTML = dataDip.map(d => {
-                const final = d.costoTotal - (d.costoTotal * ((d.descuento || 0) / 100));
+                const desc = d.descuento || 0;
+                const totalConDesc = d.total - (d.total * (desc / 100));
+                const docu = Number(d.documentacion || 0);
                 return `
-                <div class="bg-white p-5 rounded-3xl border border-pink-50 shadow-sm relative overflow-hidden">
+                <div class="bg-white p-5 rounded-3xl border border-pink-50 shadow-sm relative">
                     <div class="flex justify-between items-start mb-2">
-                        <h4 class="font-bold text-gray-800 leading-tight">${d.nombre}</h4>
-                        <div class="flex gap-2">
-                            <button onclick="abrirModal('diplomado', '${d.id}')" class="text-sm p-1">✏️</button>
-                            <button onclick="borrar('diplomados', '${d.id}')" class="text-sm p-1 opacity-30">🗑️</button>
+                        <h4 class="font-bold text-gray-800">${d.nombre}</h4>
+                        <div class="flex gap-1">
+                            <button onclick="abrirModal('diplomado', '${d.id}')" class="text-xs p-1">✏️</button>
+                            <button onclick="borrar('diplomados', '${d.id}')" class="text-xs p-1 opacity-20">🗑️</button>
                         </div>
                     </div>
-                    <div class="flex flex-wrap gap-x-3 gap-y-1 mb-4">
-                        <p class="text-[10px] font-bold text-pink-400 uppercase">${d.duracion || '6 meses'}</p>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase">🕒 ${d.horario || 'Sin horario'}</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="text-[9px] font-bold bg-pink-50 text-pink-500 px-2 py-1 rounded-lg uppercase">${d.duracion || 'Sin duración'}</span>
+                        <span class="text-[9px] font-bold bg-gray-50 text-gray-400 px-2 py-1 rounded-lg uppercase">🕒 ${d.horario || 'S/H'}</span>
                     </div>
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-[11px]"><span class="text-gray-400">Inversión Base:</span><span class="line-through text-gray-300">$${Number(d.costoTotal || 0).toLocaleString()}</span></div>
-                        <div class="flex justify-between text-[11px]"><span class="text-gray-400">Descuento:</span><span class="text-green-500 font-bold">-${d.descuento || 0}%</span></div>
-                        <div class="mt-3 pt-3 border-t border-pink-50 flex justify-between items-center">
-                            <span class="text-xs font-bold text-gray-400 uppercase">Ahorras: $${(d.costoTotal - final).toLocaleString()}</span>
-                            <span class="text-lg font-black text-pink-600">$${final.toLocaleString()}</span>
+                    <div class="space-y-2 pt-2 border-t border-pink-50">
+                        <div class="flex justify-between text-[11px]">
+                            <span class="text-gray-400">Pago Total Diplomado:</span>
+                            <span class="font-bold text-pink-600">$${totalConDesc.toLocaleString()}</span>
+                        </div>
+                        <div class="flex justify-between text-[11px]">
+                            <span class="text-gray-400">Documentación Final:</span>
+                            <span class="font-bold text-gray-600">$${docu.toLocaleString()}</span>
                         </div>
                     </div>
                 </div>`;
@@ -368,101 +396,135 @@
 
         function renderCert() {
             const grid = document.getElementById('certGrid');
+            if(!grid) return;
             grid.innerHTML = dataCert.map(c => `
                 <div class="bg-white p-5 rounded-3xl border border-blue-50 shadow-sm">
                     <div class="flex justify-between items-start mb-3">
-                        <h4 class="font-bold text-gray-800 leading-tight">${c.nombre}</h4>
-                        <div class="flex gap-2">
-                            <button onclick="abrirModal('certificacion', '${c.id}')" class="text-sm p-1">✏️</button>
-                            <button onclick="borrar('certificaciones', '${c.id}')" class="text-sm p-1 opacity-30">🗑️</button>
-                        </div>
+                        <h4 class="font-bold text-gray-800">${c.nombre}</h4>
+                        <button onclick="abrirModal('certificacion', '${c.id}')" class="text-xs">✏️</button>
                     </div>
-                    <div class="bg-blue-50 p-3 rounded-2xl flex justify-between items-center">
-                        <span class="text-xs font-bold text-blue-500 uppercase">Inversión:</span>
-                        <span class="text-xl font-black text-blue-700">$${(Number(c.costoCert || 0) + Number(c.costoEval || 0)).toLocaleString()}</span>
-                    </div>
+                    <div class="text-2xl font-black text-blue-600">$${(Number(c.costoCert || 0) + Number(c.costoEval || 0)).toLocaleString()}</div>
                 </div>`).join('');
         }
 
         function renderTal() {
             const grid = document.getElementById('talleresGrid');
+            if(!grid) return;
             grid.innerHTML = dataTal.map(t => `
                 <div class="bg-white p-5 rounded-3xl border border-purple-50 shadow-sm">
-                    <div class="flex justify-between items-start mb-1">
-                        <h4 class="font-bold text-gray-800 leading-tight">${t.nombre}</h4>
-                        <div class="flex gap-2">
-                            <button onclick="abrirModal('taller', '${t.id}')" class="text-sm p-1">✏️</button>
-                            <button onclick="borrar('talleres', '${t.id}')" class="text-sm p-1 opacity-30">🗑️</button>
-                        </div>
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-bold text-gray-800">${t.nombre}</h4>
+                        <button onclick="abrirModal('taller', '${t.id}')" class="text-xs">✏️</button>
                     </div>
-                    <div class="flex flex-wrap gap-x-3 gap-y-1 mb-3">
-                        <div class="text-[10px] font-bold text-purple-400 uppercase">${t.fechasArray?.length || 0} DÍAS</div>
-                        <div class="text-[10px] font-bold text-gray-400 uppercase">🕒 ${t.horario || 'Sin horario'}</div>
-                    </div>
-                    <div class="bg-purple-50 p-3 rounded-2xl flex justify-between items-center">
-                        <span class="text-xs font-bold text-purple-600 uppercase">Total:</span>
-                        <span class="text-xl font-black text-purple-700">$${Number(t.costo || 0).toLocaleString()}</span>
-                    </div>
+                    <div class="text-[10px] text-gray-400 font-bold mb-2 uppercase">🕒 ${t.horario || 'Sin horario'}</div>
+                    <div class="text-xl font-black text-purple-600">$${Number(t.costo || 0).toLocaleString()}</div>
                 </div>`).join('');
         }
 
-        window.borrar = async (col, id) => { if(confirm('¿Eliminar definitivamente?')) await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', col, id)); };
+        window.borrar = async (colName, id) => {
+            if (!auth.currentUser) return;
+            if (confirm('¿Borrar este elemento?')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', colName, id));
+                } catch (err) {
+                    console.error("Error al borrar:", err);
+                }
+            }
+        };
 
+        // Form Handlers
         document.getElementById('diplomadoForm').onsubmit = async (e) => {
             e.preventDefault();
+            if (!auth.currentUser) return;
             const id = document.getElementById('editIdDip').value;
-            const data = {
+            const payload = {
                 nombre: document.getElementById('nombreDip').value,
                 duracion: document.getElementById('duracionDip').value,
                 fechaInicio: document.getElementById('fechaInicioDip').value,
-                horario: document.getElementById('horarioDip').value, // Guardar horario
-                inscripcion: Number(document.getElementById('inscripcionDip').value),
+                horario: document.getElementById('horarioDip').value,
+                clase: Number(document.getElementById('claseDip').value),
+                mes: Number(document.getElementById('mesDip').value),
+                total: Number(document.getElementById('totalDip').value),
                 descuento: Number(document.getElementById('descuentoDip').value),
-                costoClase: Number(document.getElementById('claseDip').value),
-                costoMes: Number(document.getElementById('mesDip').value),
-                costoTotal: Number(document.getElementById('totalDip').value),
-                temarioLink: document.getElementById('linkDip').value,
+                inscripcion: Number(document.getElementById('inscripcionDip').value),
+                documentacion: Number(document.getElementById('docuDip').value),
+                link: document.getElementById('linkDip').value,
                 updated: serverTimestamp()
             };
-            if(id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados', id), data);
-            else await addDoc(colDip, {...data, created: serverTimestamp()});
-            cerrarModal('diplomado');
-        };
-
-        document.getElementById('certificacionForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('editIdCert').value;
-            const data = {
-                nombre: document.getElementById('nombreCert').value,
-                costoCert: Number(document.getElementById('costoCert').value),
-                costoEval: Number(document.getElementById('evalCert').value),
-                linkDrive: document.getElementById('linkCert').value,
-                updated: serverTimestamp()
-            };
-            if(id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones', id), data);
-            else await addDoc(colCert, {...data, created: serverTimestamp()});
-            cerrarModal('certificacion');
+            try {
+                if (id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados', id), payload);
+                else await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados'), payload);
+                cerrarModal('diplomado');
+            } catch (err) { console.error("Error Diplomado Form:", err); }
         };
 
         document.getElementById('tallerForm').onsubmit = async (e) => {
             e.preventDefault();
+            if (!auth.currentUser) return;
             const id = document.getElementById('editIdTal').value;
-            const data = {
+            const cost = (Number(document.getElementById('costoPorDiaTal').value) || 0) * selectedDates.length;
+            const payload = {
                 nombre: document.getElementById('nombreTal').value,
-                costoPorDia: Number(document.getElementById('costoPorDiaTal').value),
-                horasPorDia: document.getElementById('horasTal').value,
-                horario: document.getElementById('horarioTal').value, // Guardar horario
-                fechasArray: selectedDates,
-                costo: Number(document.getElementById('costoTal').value),
-                linkDrive: document.getElementById('linkTal').value,
+                costoDia: Number(document.getElementById('costoPorDiaTal').value),
+                horario: document.getElementById('horarioTal').value,
+                fechas: selectedDates,
+                costo: cost,
                 updated: serverTimestamp()
             };
-            if(id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'talleres', id), data);
-            else await addDoc(colTal, {...data, created: serverTimestamp()});
-            cerrarModal('taller');
+            try {
+                if (id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'talleres', id), payload);
+                else await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'talleres'), payload);
+                cerrarModal('taller');
+            } catch (err) { console.error("Error Taller Form:", err); }
         };
 
-        init();
+        document.getElementById('certificacionForm').onsubmit = async (e) => {
+            e.preventDefault();
+            if (!auth.currentUser) return;
+            const id = document.getElementById('editIdCert').value;
+            const payload = {
+                nombre: document.getElementById('nombreCert').value,
+                costoCert: Number(document.getElementById('costoCert').value),
+                costoEval: Number(document.getElementById('evalCert').value),
+                link: document.getElementById('linkCert').value,
+                updated: serverTimestamp()
+            };
+            try {
+                if (id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones', id), payload);
+                else await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones'), payload);
+                cerrarModal('certificacion');
+            } catch (err) { console.error("Error Certificación Form:", err); }
+        };
+
+        // Calendar Helpers
+        function buildCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            if (!grid) return;
+            const d = new Date();
+            const days = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+            grid.innerHTML = '';
+            for (let i = 1; i <= days; i++) {
+                const date = `2025-05-${String(i).padStart(2, '0')}`;
+                const div = document.createElement('div');
+                div.className = 'calendar-day';
+                div.dataset.date = date;
+                div.innerText = i;
+                div.onclick = () => toggleDate(date);
+                grid.appendChild(div);
+            }
+        }
+        window.toggleDate = (date) => {
+            const idx = selectedDates.indexOf(date);
+            if (idx > -1) selectedDates.splice(idx, 1); else selectedDates.push(date);
+            updateCalendarUI(); recalcTaller();
+        };
+        function updateCalendarUI() { document.querySelectorAll('.calendar-day').forEach(el => el.classList.toggle('selected', selectedDates.includes(el.dataset.date))); }
+        window.recalcTaller = () => {
+            const total = (Number(document.getElementById('costoPorDiaTal').value) || 0) * selectedDates.length;
+            document.getElementById('talSummary').innerText = `${selectedDates.length} días`;
+            document.getElementById('totalTallerDisplay').innerText = `$${total.toLocaleString()}`;
+        };
+
     </script>
 </body>
 </html>
