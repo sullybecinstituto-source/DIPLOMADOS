@@ -9,11 +9,14 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fff5f7; -webkit-tap-highlight-color: transparent; }
         .pink-gradient { background: linear-gradient(135deg, #ff85a2 0%, #ff4d6d 100%); }
+        .blue-gradient { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); }
         .card-shadow { box-shadow: 0 10px 25px -5px rgba(255, 133, 162, 0.1); }
-        input, select { border: 1px solid #ffe4e9; border-radius: 12px; padding: 10px; width: 100%; outline: none; transition: all 0.3s; font-size: 15px; background: white; }
-        input:focus { border-color: #ff85a2; box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.1); }
+        input, select, textarea { border: 1px solid #ffe4e9; border-radius: 12px; padding: 10px; width: 100%; outline: none; transition: all 0.3s; font-size: 15px; background: white; }
+        input:focus, textarea:focus { border-color: #ff85a2; box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.1); }
         label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.025em; }
         
+        .tab-active { border-bottom: 3px solid #ff4d6d; color: #ff4d6d; }
+
         @media (max-width: 640px) {
             .mobile-fab { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; border-radius: 50%; z-index: 999; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(255, 77, 109, 0.4); }
             .mobile-fab span:last-child { display: none; }
@@ -23,103 +26,132 @@
     </style>
 </head>
 <body>
-    <nav class="bg-white border-b border-pink-100 px-4 md:px-8 py-4 sticky top-0 z-50 flex justify-between items-center">
+    <nav class="bg-white border-b border-pink-100 px-4 md:px-8 py-4 sticky top-0 z-50 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 pink-gradient rounded-full flex items-center justify-center text-white font-bold shadow-lg">S</div>
             <h1 class="text-lg font-bold italic text-pink-500">SullyBec.Instituto</h1>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="switchTab('diplomados')" id="tabDip" class="px-2 py-1 font-bold text-sm transition-all tab-active">Diplomados</button>
+            <button onclick="switchTab('certificaciones')" id="tabCert" class="px-2 py-1 font-bold text-sm text-gray-400 transition-all">Certificaciones</button>
         </div>
     </nav>
 
     <main class="max-w-6xl mx-auto p-4 md:p-8">
         <div id="errorLog"></div>
 
-        <div class="flex justify-between items-end mb-8">
-            <div>
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Gestión de Diplomados</h2>
-                <p class="text-gray-500 text-sm">Configura costos, fechas y enlaces de Drive</p>
-            </div>
-            <button onclick="window.abrirModal()" class="mobile-fab pink-gradient text-white px-6 py-3 rounded-2xl font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
-                <span class="text-xl">+</span><span>Nuevo</span>
-            </button>
+        <div id="statusMsg" class="fixed top-20 left-1/2 -translate-x-1/2 z-[2000] hidden">
+            <span class="px-6 py-3 rounded-2xl shadow-xl font-bold bg-green-500 text-white animate-bounce inline-block"></span>
         </div>
 
-        <div id="statusMsg" class="mb-4 text-center hidden">
-            <span class="px-4 py-2 rounded-full text-xs font-bold bg-pink-100 text-pink-600"></span>
-        </div>
-
-        <div id="diplomasGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div id="loadingState" class="col-span-full text-center py-20 text-gray-400 italic">
-                Estableciendo conexión segura...
+        <!-- SECCIÓN DIPLOMADOS -->
+        <section id="sec-diplomados">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Gestión de Diplomados</h2>
+                    <p class="text-gray-500 text-sm">Costos, inscripciones y descuentos</p>
+                </div>
+                <button onclick="window.abrirModal('diplomado')" class="mobile-fab pink-gradient text-white px-6 py-3 rounded-2xl font-bold shadow-lg flex items-center gap-2">
+                    <span class="text-xl">+</span><span>Nuevo Diplomado</span>
+                </button>
             </div>
-        </div>
+            <div id="diplomasGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="col-span-full text-center py-20 text-gray-400">Cargando diplomados...</div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN CERTIFICACIONES -->
+        <section id="sec-certificaciones" class="hidden">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Certificaciones</h2>
+                    <p class="text-gray-500 text-sm">Estándares de competencia y acreditaciones</p>
+                </div>
+                <button onclick="window.abrirModal('certificacion')" class="mobile-fab blue-gradient text-white px-6 py-3 rounded-2xl font-bold shadow-lg flex items-center gap-2">
+                    <span class="text-xl">+</span><span>Nueva Certificación</span>
+                </button>
+            </div>
+            <div id="certGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="col-span-full text-center py-20 text-gray-400">Cargando certificaciones...</div>
+            </div>
+        </section>
     </main>
 
-    <!-- Modal Formulario -->
-    <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[1000] p-4 overflow-y-auto" style="display: none;">
+    <!-- MODAL DIPLOMADO -->
+    <div id="modal-diplomado" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[1000] p-4 overflow-y-auto">
         <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl my-auto animate-in zoom-in duration-200">
             <div class="p-6 border-b border-pink-50 flex justify-between items-center">
-                <h3 id="modalTitle" class="text-xl font-bold text-pink-600">Alta de Diplomado</h3>
-                <button onclick="window.cerrarModal()" class="text-gray-400 text-3xl hover:text-pink-500 transition-colors">&times;</button>
+                <h3 id="dipModalTitle" class="text-xl font-bold text-pink-600">Alta de Diplomado</h3>
+                <button onclick="cerrarModal('diplomado')" class="text-gray-400 text-3xl">&times;</button>
             </div>
-            
-            <form id="diplomaForm" class="p-6 md:p-8 space-y-6">
-                <input type="hidden" id="editId">
-                
+            <form id="diplomaForm" class="p-6 md:p-8 space-y-4">
+                <input type="hidden" id="editIdDip">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="md:col-span-2">
-                        <label>Nombre del Diplomado</label>
-                        <input type="text" id="nombre" required placeholder="Ej. Masaje Champi e Indian Head">
-                    </div>
-                    <div>
-                        <label>Duración</label>
-                        <input type="text" id="duracion" required placeholder="Ej. 6 meses / 24 clases">
-                    </div>
-                    <div>
-                        <label>Próxima Fecha de Inicio</label>
-                        <input type="date" id="fechaInicio" required>
-                    </div>
+                    <div class="md:col-span-2"><label>Nombre</label><input type="text" id="nombreDip" required></div>
+                    <div><label>Duración</label><input type="text" id="duracionDip" required></div>
+                    <div><label>Fecha Inicio</label><input type="date" id="fechaInicioDip" required></div>
+                    <div><label>Costo Inscripción ($)</label><input type="number" id="inscripcionDip" required></div>
+                    <div><label>Descuento Especial (%)</label><input type="number" id="descuentoDip" value="0"></div>
                 </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-pink-50/30 p-4 rounded-2xl">
-                    <div class="col-span-2 md:col-span-4"><label class="text-pink-600">Estructura de Costos ($)</label></div>
-                    <div>
-                        <label>Por Clase</label>
-                        <input type="number" id="costoClase" required placeholder="0" min="0" step="any">
-                    </div>
-                    <div>
-                        <label>Por Mes</label>
-                        <input type="number" id="costoMes" required placeholder="0" min="0" step="any">
-                    </div>
-                    <div>
-                        <label>Total Completo</label>
-                        <input type="number" id="costoTotal" required placeholder="0" min="0" step="any">
-                    </div>
-                    <div>
-                        <label>Extras (Trámites)</label>
-                        <input type="number" id="costoExtra" required placeholder="0" min="0" step="any">
-                    </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-pink-50/50 p-4 rounded-2xl">
+                    <div class="col-span-2 md:col-span-4 font-bold text-xs text-pink-600">MENSUALIDADES Y TOTALES</div>
+                    <div><label>Clase</label><input type="number" id="claseDip" required></div>
+                    <div><label>Mes</label><input type="number" id="mesDip" required></div>
+                    <div><label>Total</label><input type="number" id="totalDip" required></div>
+                    <div><label>Extras</label><input type="number" id="extraDip" value="0"></div>
                 </div>
-
-                <div>
-                    <label>Enlace de Google Drive (Temario PDF)</label>
-                    <input type="url" id="temarioLink" placeholder="https://drive.google.com/file/d/...">
-                    <p class="text-[10px] text-gray-400 mt-1 italic">Asegúrate de que el enlace sea público en Drive.</p>
-                </div>
-
+                <div><label>Link Drive (Temario)</label><input type="url" id="linkDip"></div>
                 <div class="flex gap-3 pt-4">
-                    <button type="button" onclick="window.cerrarModal()" class="flex-1 bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold hover:bg-gray-200 transition-colors">Cancelar</button>
-                    <button type="submit" id="btnSubmit" class="flex-1 pink-gradient text-white py-4 rounded-2xl font-bold shadow-lg hover:opacity-90 transition-opacity">Guardar Diplomado</button>
+                    <button type="button" onclick="cerrarModal('diplomado')" class="flex-1 py-4 font-bold text-gray-500">Cancelar</button>
+                    <button type="submit" id="btnSaveDip" class="flex-1 pink-gradient text-white py-4 rounded-2xl font-bold">Guardar Cambios</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- MODAL CERTIFICACIÓN -->
+    <div id="modal-certificacion" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[1000] p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl my-auto animate-in zoom-in duration-200">
+            <div class="p-6 border-b border-blue-50 flex justify-between items-center">
+                <h3 id="certModalTitle" class="text-xl font-bold text-blue-600">Nueva Certificación</h3>
+                <button onclick="cerrarModal('certificacion')" class="text-gray-400 text-3xl">&times;</button>
+            </div>
+            <form id="certForm" class="p-6 md:p-8 space-y-4">
+                <input type="hidden" id="editIdCert">
+                <div><label>Nombre de la Certificación (Estándar)</label><input type="text" id="nombreCert" required placeholder="Ej. EC0307.01 Atención al comensal"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label>Costo Certificación ($)</label><input type="number" id="costoCert" required></div>
+                    <div><label>Costo Evaluación ($)</label><input type="number" id="evalCert" required></div>
+                </div>
+                <div><label>Link Drive (Estándar de Competencia)</label><input type="url" id="linkCert" placeholder="Enlace al PDF del estándar"></div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="cerrarModal('certificacion')" class="flex-1 py-4 font-bold text-gray-500">Cancelar</button>
+                    <button type="submit" id="btnSaveCert" class="flex-1 blue-gradient text-white py-4 rounded-2xl font-bold">Guardar Certificación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMACIÓN ELIMINAR -->
+    <div id="modal-delete" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-[3000] p-4">
+        <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center">
+            <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-xl font-bold mb-2">¿Eliminar registro?</h3>
+            <p class="text-gray-500 text-sm mb-6">Esta acción no se puede deshacer.</p>
+            <div class="flex gap-3">
+                <button onclick="confirmarEliminar(false)" class="flex-1 py-3 font-bold text-gray-400">Cancelar</button>
+                <button id="btnConfirmDel" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // CONFIGURACIÓN INTEGRADA CON TUS DATOS
         const firebaseConfig = {
             apiKey: "AIzaSyBv4oDOH5mPBN79m_Y47UYa9H1SJ1S7BL8",
             authDomain: "gestor-de-diplomados.firebaseapp.com",
@@ -129,156 +161,196 @@
             appId: "1:25065074693:web:6541747c26543c709f2c6c"
         };
 
-        let db, auth, collectionRef;
-        const APP_ID_PATH = 'sullybec-admin';
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const APP_ID = 'sullybec-admin';
 
-        function showError(msg) {
-            const log = document.getElementById('errorLog');
-            log.innerText = "⚠️ " + msg;
-            log.style.display = 'block';
-        }
+        // REFERENCIAS
+        const colDip = collection(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados');
+        const colCert = collection(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones');
 
-        const initialize = async () => {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                collectionRef = collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'diplomados');
+        let dataDip = [], dataCert = [];
+        let deleteContext = null;
 
-                // Autenticación anónima para permitir guardar
-                await signInAnonymously(auth);
-
-                startListening();
-            } catch (e) { 
-                showError("Error de conexión: " + e.message);
-                console.error(e); 
-            }
+        // INICIALIZACIÓN
+        const init = async () => {
+            await signInAnonymously(auth);
+            listenDip();
+            listenCert();
         };
 
-        let diplomadosData = [];
-        let isSaving = false;
-
-        window.abrirModal = (id = null) => {
-            const modal = document.getElementById('modal');
-            const form = document.getElementById('diplomaForm');
-            modal.style.display = 'flex';
-            modal.classList.remove('hidden');
-            
-            if(id) {
-                const d = diplomadosData.find(item => item.id === id);
-                document.getElementById('modalTitle').innerText = "Editar Diplomado";
-                document.getElementById('editId').value = id;
-                document.getElementById('nombre').value = d.nombre || '';
-                document.getElementById('duracion').value = d.duracion || '';
-                document.getElementById('fechaInicio').value = d.fechaInicio || '';
-                document.getElementById('costoClase').value = d.costoClase || '';
-                document.getElementById('costoMes').value = d.costoMes || '';
-                document.getElementById('costoTotal').value = d.costoTotal || '';
-                document.getElementById('costoExtra').value = d.costoExtra || '';
-                document.getElementById('temarioLink').value = d.temarioLink || '';
-            } else {
-                document.getElementById('modalTitle').innerText = "Alta de Diplomado";
-                form.reset();
-                document.getElementById('editId').value = '';
-            }
+        // NAVEGACIÓN
+        window.switchTab = (tab) => {
+            document.getElementById('sec-diplomados').classList.toggle('hidden', tab !== 'diplomados');
+            document.getElementById('sec-certificaciones').classList.toggle('hidden', tab !== 'certificaciones');
+            document.getElementById('tabDip').classList.toggle('tab-active', tab === 'diplomados');
+            document.getElementById('tabCert').classList.toggle('tab-active', tab === 'certificaciones');
+            document.getElementById('tabDip').classList.toggle('text-gray-400', tab !== 'diplomados');
+            document.getElementById('tabCert').classList.toggle('text-gray-400', tab !== 'certificaciones');
         };
 
-        window.cerrarModal = () => {
-            if (isSaving) return;
-            document.getElementById('modal').style.display = 'none';
-        };
-
-        function startListening() {
-            onSnapshot(query(collectionRef), (snapshot) => {
+        // ESCUCHADORES
+        function listenDip() {
+            onSnapshot(query(colDip), snap => {
                 const grid = document.getElementById('diplomasGrid');
                 grid.innerHTML = '';
-                diplomadosData = [];
-                
-                snapshot.forEach(doc => diplomadosData.push({ id: doc.id, ...doc.data() }));
-                diplomadosData.sort((a, b) => (b.fechaCreacion?.seconds || 0) - (a.fechaCreacion?.seconds || 0));
-
-                if (diplomadosData.length === 0) {
-                    grid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-400 italic">No hay diplomados registrados. Haz clic en "+ Nuevo".</div>';
-                    return;
-                }
-
-                diplomadosData.forEach(d => {
+                dataDip = [];
+                snap.forEach(d => dataDip.push({id: d.id, ...d.data()}));
+                if(!dataDip.length) grid.innerHTML = '<p class="col-span-full text-center py-10 opacity-50">No hay diplomados.</p>';
+                dataDip.forEach(d => {
                     grid.innerHTML += `
-                        <div class="bg-white rounded-3xl p-6 card-shadow border border-pink-50 relative overflow-hidden">
-                            <div class="absolute top-0 right-0 p-4">
-                                <button onclick="window.abrirModal('${d.id}')" class="bg-pink-50 text-pink-500 p-2 rounded-xl hover:bg-pink-500 hover:text-white transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
+                        <div class="bg-white p-6 rounded-3xl card-shadow relative">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold text-lg leading-tight">${d.nombre}</h4>
+                                <div class="flex gap-2">
+                                    <button onclick="abrirModal('diplomado', '${d.id}')" class="text-pink-400 p-1">✏️</button>
+                                    <button onclick="pedirEliminar('diplomado', '${d.id}')" class="text-red-400 p-1">🗑️</button>
+                                </div>
                             </div>
-                            <h4 class="font-bold text-gray-800 text-xl pr-10 mb-2">${d.nombre}</h4>
-                            <p class="text-pink-400 text-sm font-bold mb-4">Inicio: ${d.fechaInicio}</p>
-                            
-                            <div class="grid grid-cols-2 gap-3 text-xs mb-4">
-                                <div class="bg-gray-50 p-2 rounded-lg"><b>Mes:</b> $${d.costoMes}</div>
-                                <div class="bg-gray-50 p-2 rounded-lg"><b>Clase:</b> $${d.costoClase}</div>
-                                <div class="bg-pink-50 text-pink-600 p-2 rounded-lg font-bold"><b>Total:</b> $${d.costoTotal}</div>
-                                <div class="bg-orange-50 text-orange-600 p-2 rounded-lg"><b>Extras:</b> $${d.costoExtra}</div>
+                            <div class="text-xs text-pink-500 font-bold mb-4 uppercase tracking-wider">${d.duracion} • Inicio: ${d.fechaInicio}</div>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between text-sm"><span>Inscripción:</span> <span class="font-bold text-gray-700">$${d.inscripcion || 0}</span></div>
+                                <div class="flex justify-between text-sm"><span>Mensualidad:</span> <span class="font-bold text-gray-700">$${d.costoMes}</span></div>
+                                <div class="flex justify-between text-sm text-green-600"><span>Descuento:</span> <span class="font-bold">${d.descuento || 0}%</span></div>
+                                <div class="pt-2 border-t flex justify-between font-bold text-pink-600 text-lg"><span>Total:</span> <span>$${d.costoTotal}</span></div>
                             </div>
-                            
-                            <div class="flex items-center justify-between text-xs text-gray-400 border-t pt-4">
-                                <span>Duración: ${d.duracion}</span>
-                                ${d.temarioLink ? `
-                                    <a href="${d.temarioLink}" target="_blank" class="text-pink-500 underline font-bold">Ver Temario</a>
-                                ` : ''}
-                            </div>
+                            ${d.temarioLink ? `<a href="${d.temarioLink}" target="_blank" class="block text-center text-xs font-bold text-gray-400 hover:text-pink-500 transition-colors">VER TEMARIO DRIVE</a>` : ''}
                         </div>
                     `;
                 });
-            }, (err) => {
-                showError("Error de permisos: Asegúrate de configurar las Reglas en Firestore (Rules). " + err.message);
             });
         }
 
-        const form = document.getElementById('diplomaForm');
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            if (isSaving) return;
+        function listenCert() {
+            onSnapshot(query(colCert), snap => {
+                const grid = document.getElementById('certGrid');
+                grid.innerHTML = '';
+                dataCert = [];
+                snap.forEach(d => dataCert.push({id: d.id, ...d.data()}));
+                if(!dataCert.length) grid.innerHTML = '<p class="col-span-full text-center py-10 opacity-50">No hay certificaciones registradas.</p>';
+                dataCert.forEach(c => {
+                    grid.innerHTML += `
+                        <div class="bg-white p-6 rounded-3xl card-shadow border border-blue-50 relative">
+                             <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold text-lg leading-tight text-blue-800">${c.nombre}</h4>
+                                <div class="flex gap-2">
+                                    <button onclick="abrirModal('certificacion', '${c.id}')" class="text-blue-400 p-1">✏️</button>
+                                    <button onclick="pedirEliminar('certificacion', '${c.id}')" class="text-red-400 p-1">🗑️</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div class="bg-blue-50 p-3 rounded-2xl text-center">
+                                    <div class="text-[10px] text-blue-400 font-bold">CERTIFICADO</div>
+                                    <div class="font-bold text-blue-700">$${c.costoCert}</div>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-2xl text-center">
+                                    <div class="text-[10px] text-gray-400 font-bold">EVALUACIÓN</div>
+                                    <div class="font-bold text-gray-700">$${c.costoEval}</div>
+                                </div>
+                            </div>
+                            ${c.linkDrive ? `<a href="${c.linkDrive}" target="_blank" class="block mt-4 text-center text-xs font-bold text-blue-500 underline">ESTÁNDAR DE COMPETENCIA</a>` : ''}
+                        </div>
+                    `;
+                });
+            });
+        }
 
-            const btn = document.getElementById('btnSubmit');
-            const editId = document.getElementById('editId').value;
-            
-            isSaving = true;
-            btn.disabled = true;
-            btn.innerText = "Guardando...";
-
-            try {
-                const data = {
-                    nombre: document.getElementById('nombre').value.trim(),
-                    duracion: document.getElementById('duracion').value.trim(),
-                    fechaInicio: document.getElementById('fechaInicio').value,
-                    costoClase: Number(document.getElementById('costoClase').value) || 0,
-                    costoMes: Number(document.getElementById('costoMes').value) || 0,
-                    costoTotal: Number(document.getElementById('costoTotal').value) || 0,
-                    costoExtra: Number(document.getElementById('costoExtra').value) || 0,
-                    temarioLink: document.getElementById('temarioLink').value.trim(),
-                    ultimaModificacion: serverTimestamp()
-                };
-
-                if(editId) {
-                    const docRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'diplomados', editId);
-                    await updateDoc(docRef, data);
-                } else {
-                    await addDoc(collectionRef, { 
-                        ...data, 
-                        fechaCreacion: serverTimestamp()
-                    });
+        // GESTIÓN DE MODALES
+        window.abrirModal = (tipo, id = null) => {
+            const modal = document.getElementById(`modal-${tipo}`);
+            modal.style.display = 'flex';
+            if(tipo === 'diplomado') {
+                const form = document.getElementById('diplomaForm');
+                form.reset();
+                document.getElementById('editIdDip').value = id || '';
+                if(id) {
+                    const d = dataDip.find(x => x.id === id);
+                    document.getElementById('nombreDip').value = d.nombre;
+                    document.getElementById('duracionDip').value = d.duracion;
+                    document.getElementById('fechaInicioDip').value = d.fechaInicio;
+                    document.getElementById('inscripcionDip').value = d.inscripcion || 0;
+                    document.getElementById('descuentoDip').value = d.descuento || 0;
+                    document.getElementById('claseDip').value = d.costoClase;
+                    document.getElementById('mesDip').value = d.costoMes;
+                    document.getElementById('totalDip').value = d.costoTotal;
+                    document.getElementById('extraDip').value = d.costoExtra || 0;
+                    document.getElementById('linkDip').value = d.temarioLink || '';
                 }
-                
-                window.cerrarModal();
-                showStatus("¡Guardado correctamente!");
-            } catch (error) {
-                console.error(error);
-                showError("No se pudo guardar: " + error.message);
-            } finally {
-                isSaving = false;
-                btn.disabled = false;
-                btn.innerText = "Guardar Diplomado";
+            } else {
+                const form = document.getElementById('certForm');
+                form.reset();
+                document.getElementById('editIdCert').value = id || '';
+                if(id) {
+                    const c = dataCert.find(x => x.id === id);
+                    document.getElementById('nombreCert').value = c.nombre;
+                    document.getElementById('costoCert').value = c.costoCert;
+                    document.getElementById('evalCert').value = c.costoEval;
+                    document.getElementById('linkCert').value = c.linkDrive || '';
+                }
             }
+        };
+
+        window.cerrarModal = (tipo) => {
+            document.getElementById(`modal-${tipo}`).style.display = 'none';
+        };
+
+        // ELIMINAR
+        window.pedirEliminar = (tipo, id) => {
+            deleteContext = { tipo, id };
+            document.getElementById('modal-delete').style.display = 'flex';
+        };
+
+        window.confirmarEliminar = async (confirm) => {
+            if(confirm && deleteContext) {
+                const { tipo, id } = deleteContext;
+                const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', tipo === 'diplomado' ? 'diplomados' : 'certificaciones', id);
+                await deleteDoc(ref);
+                showStatus("Registro eliminado");
+            }
+            document.getElementById('modal-delete').style.display = 'none';
+            deleteContext = null;
+        };
+
+        document.getElementById('btnConfirmDel').onclick = () => confirmarEliminar(true);
+
+        // FORMULARIOS (GUARDAR)
+        document.getElementById('diplomaForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editIdDip').value;
+            const data = {
+                nombre: document.getElementById('nombreDip').value,
+                duracion: document.getElementById('duracionDip').value,
+                fechaInicio: document.getElementById('fechaInicioDip').value,
+                inscripcion: Number(document.getElementById('inscripcionDip').value),
+                descuento: Number(document.getElementById('descuentoDip').value),
+                costoClase: Number(document.getElementById('claseDip').value),
+                costoMes: Number(document.getElementById('mesDip').value),
+                costoTotal: Number(document.getElementById('totalDip').value),
+                costoExtra: Number(document.getElementById('extraDip').value),
+                temarioLink: document.getElementById('linkDip').value,
+                updated: serverTimestamp()
+            };
+            if(id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'diplomados', id), data);
+            else await addDoc(colDip, {...data, created: serverTimestamp()});
+            cerrarModal('diplomado');
+            showStatus("Diplomado guardado con éxito");
+        };
+
+        document.getElementById('certForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editIdCert').value;
+            const data = {
+                nombre: document.getElementById('nombreCert').value,
+                costoCert: Number(document.getElementById('costoCert').value),
+                costoEval: Number(document.getElementById('evalCert').value),
+                linkDrive: document.getElementById('linkCert').value,
+                updated: serverTimestamp()
+            };
+            if(id) await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'certificaciones', id), data);
+            else await addDoc(colCert, {...data, created: serverTimestamp()});
+            cerrarModal('certificacion');
+            showStatus("Certificación guardada con éxito");
         };
 
         function showStatus(msg) {
@@ -288,7 +360,7 @@
             setTimeout(() => el.classList.add('hidden'), 3000);
         }
 
-        initialize();
+        init();
     </script>
 </body>
 </html>
