@@ -3,124 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Panel | Sullybec Instituto</title>
+    <title>Admin | SullyBec Instituto</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #fff5f7; 
-            -webkit-tap-highlight-color: transparent;
-        }
-        .pink-gradient { 
-            background: linear-gradient(135deg, #ff85a2 0%, #ff4d6d 100%); 
-        }
-        .card-shadow { 
-            box-shadow: 0 10px 25px -5px rgba(255, 133, 162, 0.1), 0 8px 10px -6px rgba(255, 133, 162, 0.1); 
-        }
-        input {
-            border: 1px solid #ffe4e9;
-            border-radius: 12px;
-            padding: 12px;
-            width: 100%;
-            outline: none;
-            transition: all 0.3s;
-            font-size: 16px; /* Evita zoom automático en iOS */
-        }
-        input:focus {
-            border-color: #ff85a2;
-            box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.2);
-        }
-        /* Estilo para el botón flotante en móviles */
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fff5f7; -webkit-tap-highlight-color: transparent; }
+        .pink-gradient { background: linear-gradient(135deg, #ff85a2 0%, #ff4d6d 100%); }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(255, 133, 162, 0.1); }
+        input, select { border: 1px solid #ffe4e9; border-radius: 12px; padding: 10px; width: 100%; outline: none; transition: all 0.3s; font-size: 15px; background: white; }
+        input:focus { border-color: #ff85a2; box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.1); }
+        label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.025em; }
+        
         @media (max-width: 640px) {
-            .mobile-fab {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 90;
-                box-shadow: 0 4px 15px rgba(255, 77, 109, 0.4);
-            }
-            .mobile-fab span:last-child {
-                display: none;
-            }
-            .mobile-fab span:first-child {
-                font-size: 30px;
-                margin: 0;
-            }
+            .mobile-fab { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; border-radius: 50%; z-index: 999; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(255, 77, 109, 0.4); }
+            .mobile-fab span:last-child { display: none; }
         }
     </style>
 </head>
 <body>
-    <nav class="bg-white border-b border-pink-100 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2 md:gap-3">
-            <div class="w-8 h-8 md:w-10 md:h-10 pink-gradient rounded-full flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-lg">s</div>
-            <h1 class="text-lg md:text-2xl font-bold italic text-pink-500">Sullybec.Instituto</h1>
+    <nav class="bg-white border-b border-pink-100 px-4 md:px-8 py-4 sticky top-0 z-50 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 pink-gradient rounded-full flex items-center justify-center text-white font-bold shadow-lg">S</div>
+            <h1 class="text-lg font-bold italic text-pink-500">SullyBec.Instituto</h1>
         </div>
     </nav>
 
     <main class="max-w-6xl mx-auto p-4 md:p-8">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div class="flex justify-between items-end mb-8">
             <div>
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Panel de Control</h2>
-                <p class="text-sm md:text-base text-gray-500">Listado de diplomados activos</p>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Gestión de Diplomados</h2>
+                <p class="text-gray-500 text-sm">Configura costos, fechas y temarios</p>
             </div>
-            
-            <button id="btnNuevo" onclick="abrirModal()" class="mobile-fab pink-gradient text-white px-6 py-3 md:px-8 md:py-4 rounded-2xl font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
-                <span class="text-xl">+</span>
-                <span>Nuevo Diplomado</span>
+            <button onclick="window.abrirModal()" class="mobile-fab pink-gradient text-white px-6 py-3 rounded-2xl font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+                <span class="text-xl">+</span><span>Nuevo</span>
             </button>
         </div>
 
-        <!-- Grid adaptable: 1 col en móvil, 2 en tablet, 3 en desktop -->
-        <div id="diplomasGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-            <div class="col-span-full text-center py-20 text-gray-400">
-                <p id="statusMsg" class="animate-pulse">Conectando...</p>
-            </div>
+        <div id="diplomasGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center py-20 text-gray-400 italic">Sincronizando con la base de datos...</div>
         </div>
     </main>
 
-    <!-- Modal Formulario Adaptado -->
-    <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-end sm:items-center justify-center z-[100] p-0 sm:p-4">
-        <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
-            <div class="p-5 border-b border-pink-50 flex justify-between items-center bg-pink-50/30">
-                <h3 class="text-xl font-bold text-pink-600">Nuevo Diplomado</h3>
-                <button onclick="cerrarModal()" class="text-gray-400 hover:text-pink-500 text-3xl p-2">&times;</button>
+    <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[1000] p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl my-auto animate-in zoom-in duration-200">
+            <div class="p-6 border-b border-pink-50 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-xl font-bold text-pink-600">Alta de Diplomado</h3>
+                <button onclick="window.cerrarModal()" class="text-gray-400 text-3xl">&times;</button>
             </div>
             
-            <form id="diplomaForm" class="p-6 md:p-8 space-y-5">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Nombre del Curso</label>
-                    <input type="text" id="nombre" required placeholder="Ej. Masaje Terapéutico">
-                </div>
+            <form id="diplomaForm" class="p-6 md:p-8 space-y-6">
+                <input type="hidden" id="editId">
                 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Costo ($)</label>
-                        <input type="number" id="costo" required placeholder="0.00">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label>Nombre del Diplomado</label>
+                        <input type="text" id="nombre" required placeholder="Ej. Masaje Champi e Indian Head">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Duración</label>
-                        <input type="text" id="duracion" required placeholder="Ej. 6 meses">
+                        <label>Duración</label>
+                        <input type="text" id="duracion" required placeholder="Ej. 6 meses / 24 clases">
+                    </div>
+                    <div>
+                        <label>Próxima Fecha de Inicio</label>
+                        <input type="date" id="fechaInicio" required>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full pink-gradient text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:opacity-90 active:scale-[0.98] transition-all mt-2">
-                    Guardar
-                </button>
-                <div class="h-4 sm:hidden"></div> <!-- Espacio extra para móviles con barra inferior -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-pink-50/30 p-4 rounded-2xl">
+                    <div class="col-span-2 md:col-span-4"><label class="text-pink-600">Estructura de Costos ($)</label></div>
+                    <div>
+                        <label>Por Clase</label>
+                        <input type="number" id="costoClase" required placeholder="0">
+                    </div>
+                    <div>
+                        <label>Por Mes</label>
+                        <input type="number" id="costoMes" required placeholder="0">
+                    </div>
+                    <div>
+                        <label>Total Completo</label>
+                        <input type="number" id="costoTotal" required placeholder="0">
+                    </div>
+                    <div>
+                        <label>Extras (Trámites)</label>
+                        <input type="number" id="costoExtra" required placeholder="0">
+                    </div>
+                </div>
+
+                <div>
+                    <label>Temario Completo (Enlace PDF o Descripción)</label>
+                    <input type="text" id="temarioLink" placeholder="Enlace a Google Drive o archivo">
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="window.cerrarModal()" class="flex-1 bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold">Cancelar</button>
+                    <button type="submit" id="btnSubmit" class="flex-1 pink-gradient text-white py-4 rounded-2xl font-bold shadow-lg">Guardar Diplomado</button>
+                </div>
             </form>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         const firebaseConfig = JSON.parse(__firebase_config);
@@ -128,37 +112,55 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'sullybec-admin';
+        
+        // Define la ruta de la colección de manera consistente
+        const collectionPath = ['artifacts', appId, 'public', 'data', 'diplomados'];
+        const collectionRef = collection(db, ...collectionPath);
 
-        const grid = document.getElementById('diplomasGrid');
-        const form = document.getElementById('diplomaForm');
-        const statusMsg = document.getElementById('statusMsg');
+        let diplomadosData = [];
 
-        const publicCollectionPath = ['artifacts', appId, 'public', 'data', 'diplomados'];
-
-        window.abrirModal = () => {
-            document.getElementById('modal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Bloquea scroll fondo
+        // UI Helpers
+        window.abrirModal = (id = null) => {
+            const modal = document.getElementById('modal');
+            const form = document.getElementById('diplomaForm');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            
+            if(id) {
+                const d = diplomadosData.find(item => item.id === id);
+                document.getElementById('modalTitle').innerText = "Editar Diplomado";
+                document.getElementById('editId').value = id;
+                document.getElementById('nombre').value = d.nombre || '';
+                document.getElementById('duracion').value = d.duracion || '';
+                document.getElementById('fechaInicio').value = d.fechaInicio || '';
+                document.getElementById('costoClase').value = d.costoClase || '';
+                document.getElementById('costoMes').value = d.costoMes || '';
+                document.getElementById('costoTotal').value = d.costoTotal || '';
+                document.getElementById('costoExtra').value = d.costoExtra || '';
+                document.getElementById('temarioLink').value = d.temarioLink || '';
+            } else {
+                document.getElementById('modalTitle').innerText = "Alta de Diplomado";
+                form.reset();
+                document.getElementById('editId').value = '';
+            }
         };
+
         window.cerrarModal = () => {
             document.getElementById('modal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
+            document.getElementById('modal').style.display = 'none';
         };
 
+        // Firebase Logic - REGLA 3: Autenticación antes de cualquier consulta
         const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                statusMsg.innerText = "Error de conexión.";
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
             }
         };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                statusMsg.innerText = "Cargando...";
                 startListening();
             } else {
                 initAuth();
@@ -166,64 +168,96 @@
         });
 
         function startListening() {
-            if (!auth.currentUser) return;
-            const collectionRef = collection(db, ...publicCollectionPath);
-            const q = query(collectionRef);
-            
-            onSnapshot(q, (snapshot) => {
+            // REGLA 2: Consultas simples (sin orderBy/where múltiples)
+            onSnapshot(query(collectionRef), (snapshot) => {
+                const grid = document.getElementById('diplomasGrid');
                 grid.innerHTML = '';
-                if (snapshot.empty) {
-                    grid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-400 font-medium">No hay diplomados aún.</div>';
+                diplomadosData = [];
+
+                snapshot.forEach(doc => diplomadosData.push({ id: doc.id, ...doc.data() }));
+
+                // Ordenar en memoria JS para evitar errores de índice en Firestore
+                diplomadosData.sort((a, b) => {
+                    const dateA = a.fechaCreacion?.toMillis ? a.fechaCreacion.toMillis() : 0;
+                    const dateB = b.fechaCreacion?.toMillis ? b.fechaCreacion.toMillis() : 0;
+                    return dateB - dateA;
+                });
+
+                if (diplomadosData.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-400 italic">No hay diplomados registrados aún.</div>';
                     return;
                 }
-                
-                const docs = [];
-                snapshot.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
-                docs.sort((a, b) => (b.fecha?.toMillis() || 0) - (a.fecha?.toMillis() || 0));
 
-                docs.forEach((item) => {
+                diplomadosData.forEach(d => {
                     grid.innerHTML += `
-                        <div class="bg-white p-5 md:p-6 rounded-3xl card-shadow border border-pink-50 flex flex-col justify-between hover:border-pink-300 transition-all">
-                            <div>
-                                <h4 class="text-lg md:text-xl font-bold text-gray-800 mb-2 leading-tight">${item.nombre || 'Sin título'}</h4>
-                                <div class="flex items-baseline gap-1 mb-4">
-                                    <span class="text-xl md:text-2xl font-bold text-pink-500">$${item.costo || '0'}</span>
-                                    <span class="text-gray-400 text-xs md:text-sm">/mes</span>
-                                </div>
+                        <div class="bg-white rounded-3xl p-6 card-shadow border border-pink-50 relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-4">
+                                <button onclick="window.abrirModal('${d.id}')" class="bg-pink-50 text-pink-500 p-2 rounded-xl hover:bg-pink-500 hover:text-white transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
                             </div>
-                            <div class="flex items-center gap-2 text-xs md:text-sm text-gray-500 bg-pink-50/50 p-3 rounded-xl">
-                                <span class="font-bold text-pink-400">Duración:</span> ${item.duracion || 'N/A'}
+                            <h4 class="font-bold text-gray-800 text-xl pr-10 mb-2">${d.nombre || 'Sin nombre'}</h4>
+                            <p class="text-pink-400 text-sm font-bold mb-4">Inicio: ${d.fechaInicio || 'Pendiente'}</p>
+                            
+                            <div class="grid grid-cols-2 gap-3 text-xs mb-4">
+                                <div class="bg-gray-50 p-2 rounded-lg"><b>Mes:</b> $${d.costoMes || 0}</div>
+                                <div class="bg-gray-50 p-2 rounded-lg"><b>Clase:</b> $${d.costoClase || 0}</div>
+                                <div class="bg-pink-50 text-pink-600 p-2 rounded-lg font-bold"><b>Total:</b> $${d.costoTotal || 0}</div>
+                                <div class="bg-orange-50 text-orange-600 p-2 rounded-lg"><b>Trámites:</b> $${d.costoExtra || 0}</div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between text-xs text-gray-400 border-t pt-4">
+                                <span>Duración: ${d.duracion || 'N/A'}</span>
+                                ${d.temarioLink ? `<a href="${d.temarioLink}" target="_blank" class="text-pink-500 underline font-bold">Ver Temario</a>` : ''}
                             </div>
                         </div>
                     `;
                 });
             }, (error) => {
-                statusMsg.innerHTML = `<span class="text-red-400 text-sm">Error de permisos en la base de datos.</span>`;
+                console.error("Firestore Error:", error);
+                document.getElementById('diplomasGrid').innerHTML = `<div class="col-span-full text-center py-20 text-red-400">Error de permisos o conexión.</div>`;
             });
         }
 
-        form.onsubmit = async (e) => {
+        document.getElementById('diplomaForm').onsubmit = async (e) => {
             e.preventDefault();
-            const btn = form.querySelector('button[type="submit"]');
+            if (!auth.currentUser) return;
+
+            const btn = document.getElementById('btnSubmit');
+            const editId = document.getElementById('editId').value;
             btn.disabled = true;
-            btn.innerText = "Guardando...";
+            btn.innerText = "Procesando...";
+
+            const data = {
+                nombre: document.getElementById('nombre').value,
+                duracion: document.getElementById('duracion').value,
+                fechaInicio: document.getElementById('fechaInicio').value,
+                costoClase: document.getElementById('costoClase').value,
+                costoMes: document.getElementById('costoMes').value,
+                costoTotal: document.getElementById('costoTotal').value,
+                costoExtra: document.getElementById('costoExtra').value,
+                temarioLink: document.getElementById('temarioLink').value,
+                ultimaModificacion: serverTimestamp()
+            };
 
             try {
-                const collectionRef = collection(db, ...publicCollectionPath);
-                await addDoc(collectionRef, {
-                    nombre: document.getElementById('nombre').value,
-                    costo: document.getElementById('costo').value,
-                    duracion: document.getElementById('duracion').value,
-                    fecha: serverTimestamp(),
-                    userId: auth.currentUser.uid
-                });
-                form.reset();
-                cerrarModal();
+                if(editId) {
+                    const docRef = doc(db, ...collectionPath, editId);
+                    await updateDoc(docRef, data);
+                } else {
+                    await addDoc(collectionRef, { 
+                        ...data, 
+                        fechaCreacion: serverTimestamp(),
+                        userId: auth.currentUser.uid 
+                    });
+                }
+                window.cerrarModal();
             } catch (error) {
-                alert("Error al guardar.");
+                console.error("Save Error:", error);
+                alert("Error al guardar: " + error.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Guardar";
+                btn.innerText = "Guardar Diplomado";
             }
         };
     </script>
