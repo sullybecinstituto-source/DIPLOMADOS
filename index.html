@@ -19,7 +19,6 @@
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
         .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; cursor: pointer; border: 1px solid #f1f5f9; transition: all 0.2s; }
         .calendar-day.selected { background: #a855f7; color: white; border-color: #7e22ce; font-weight: bold; }
-        .calendar-day.today { border-color: #ff4d6d; color: #ff4d6d; }
         .calendar-day:empty { visibility: hidden; }
 
         input, select, textarea { border: 1px solid #ffe4e9; border-radius: 14px; padding: 12px; width: 100%; outline: none; transition: all 0.3s; font-size: 16px; background: white; }
@@ -28,7 +27,6 @@
 
         @media (max-width: 640px) {
             .mobile-fab { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; z-index: 999; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(255, 77, 109, 0.4); }
-            .mobile-fab span:last-child { display: none; }
         }
     </style>
 </head>
@@ -57,7 +55,7 @@
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-extrabold text-gray-800">Diplomados</h2>
                 <button onclick="abrirModal('diplomado')" class="mobile-fab pink-gradient text-white px-5 py-2.5 rounded-2xl font-bold shadow-md flex items-center gap-2 text-sm">
-                    <span>+</span><span>Nuevo</span>
+                    <span>+</span><span class="hidden sm:inline">Nuevo</span>
                 </button>
             </div>
             <div id="diplomasGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -68,7 +66,7 @@
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-extrabold text-gray-800">Certificaciones</h2>
                 <button onclick="abrirModal('certificacion')" class="mobile-fab blue-gradient text-white px-5 py-2.5 rounded-2xl font-bold shadow-md flex items-center gap-2 text-sm">
-                    <span>+</span><span>Nueva</span>
+                    <span>+</span><span class="hidden sm:inline">Nueva</span>
                 </button>
             </div>
             <div id="certGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -79,7 +77,7 @@
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-extrabold text-gray-800">Talleres</h2>
                 <button onclick="abrirModal('taller')" class="mobile-fab purple-gradient text-white px-5 py-2.5 rounded-2xl font-bold shadow-md flex items-center gap-2 text-sm">
-                    <span>+</span><span>Nuevo</span>
+                    <span>+</span><span class="hidden sm:inline">Nuevo</span>
                 </button>
             </div>
             <div id="talleresGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -88,7 +86,7 @@
 
     <!-- MODAL DIPLOMADO -->
     <div id="modal-diplomado" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-end sm:items-center justify-center z-[1000] p-0 sm:p-4 overflow-y-auto">
-        <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-xl shadow-2xl animate-in slide-in-from-bottom duration-300">
+        <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-xl shadow-2xl">
             <div class="p-6 border-b border-pink-50 flex justify-between items-center">
                 <h3 id="dipModalTitle" class="text-lg font-bold text-pink-600">Datos del Diplomado</h3>
                 <button onclick="cerrarModal('diplomado')" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 font-bold">&times;</button>
@@ -100,17 +98,32 @@
                     <div><label>Duración</label><input type="text" id="duracionDip" placeholder="Ej. 6 meses"></div>
                     <div><label>Fecha Inicio</label><input type="date" id="fechaInicioDip"></div>
                 </div>
+                <!-- CAMPO HORARIO DIPLOMADO -->
+                <div><label>Horario</label><input type="text" id="horarioDip" placeholder="Ej. Sábados 9am a 2pm"></div>
+                
+                <div class="bg-pink-50/50 p-4 rounded-2xl space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label>Inversión Base ($)</label><input type="number" id="totalDip" oninput="recalcDiplomado()" placeholder="Total sin descuento" required></div>
+                        <div><label>Descuento (%)</label><input type="number" id="descuentoDip" oninput="recalcDiplomado()" placeholder="0"></div>
+                    </div>
+                    <div class="flex justify-between items-center pt-2">
+                        <div>
+                            <span class="text-[10px] font-bold text-pink-400 uppercase">Precio con descuento:</span>
+                            <div class="text-xl font-black text-pink-600" id="finalPriceDip">$0</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase">Ahorro:</span>
+                            <div class="text-sm font-bold text-green-500" id="savingsDip">$0</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-3 gap-3">
                     <div><label>Inscripción</label><input type="number" id="inscripcionDip" placeholder="0"></div>
-                    <div><label>Descuento %</label><input type="number" id="descuentoDip" placeholder="0"></div>
                     <div><label>Mensualidad</label><input type="number" id="mesDip" placeholder="0"></div>
-                </div>
-                <div class="grid grid-cols-3 gap-3">
                     <div><label>Clase Indiv.</label><input type="number" id="claseDip" placeholder="0"></div>
-                    <div><label>Certificado</label><input type="number" id="certCostDip" placeholder="Extra"></div>
-                    <div><label>Evaluación</label><input type="number" id="evalCostDip" placeholder="Extra"></div>
                 </div>
-                <div><label>Inversión Total ($)</label><input type="number" id="totalDip" class="font-bold text-pink-600" placeholder="Total del curso"></div>
+                
                 <div><label>Link Drive (Temario)</label><input type="url" id="linkDip" placeholder="https://..."></div>
                 <button type="submit" class="w-full pink-gradient text-white py-4 rounded-2xl font-bold shadow-lg mt-2">Guardar Diplomado</button>
             </form>
@@ -139,7 +152,7 @@
 
     <!-- MODAL TALLER -->
     <div id="modal-taller" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-end sm:items-center justify-center z-[1000] p-0 sm:p-4 overflow-y-auto">
-        <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-lg shadow-2xl animate-in slide-in-from-bottom duration-300">
+        <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-lg shadow-2xl">
             <div class="p-6 border-b border-purple-50 flex justify-between items-center">
                 <h3 id="talModalTitle" class="text-lg font-bold text-purple-600">Configurar Taller</h3>
                 <button onclick="cerrarModal('taller')" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 font-bold">&times;</button>
@@ -148,7 +161,7 @@
                 <input type="hidden" id="editIdTal">
                 <div><label>Nombre del Taller</label><input type="text" id="nombreTal" placeholder="Ej. Automaquillaje" required></div>
                 <div class="bg-purple-50/50 p-4 rounded-2xl border border-purple-100">
-                    <label class="text-purple-600">Días del taller (Toca para seleccionar)</label>
+                    <label class="text-purple-600">Seleccionar Días</label>
                     <div id="calMonthName" class="text-center font-bold text-xs mb-2 text-gray-500 uppercase">Mes Actual</div>
                     <div class="calendar-grid mb-2" id="calendarGrid"></div>
                 </div>
@@ -156,6 +169,9 @@
                     <div><label>Costo por Día ($)</label><input type="number" id="costoPorDiaTal" placeholder="0" oninput="recalcTaller()"></div>
                     <div><label>Horas por Día</label><input type="text" id="horasTal" placeholder="Ej. 3h"></div>
                 </div>
+                <!-- CAMPO HORARIO TALLER -->
+                <div><label>Horario</label><input type="text" id="horarioTal" placeholder="Ej. 4pm a 7pm"></div>
+
                 <div class="bg-purple-600 p-4 rounded-2xl flex justify-between items-center shadow-lg">
                     <div>
                         <div class="text-[10px] text-purple-200 font-bold uppercase">Inversión Final</div>
@@ -201,23 +217,19 @@
         };
 
         window.switchTab = (tab) => {
-            const tabs = { diplomados: 'tabDip', certificaciones: 'tabCert', talleres: 'tabTal' };
-            Object.keys(tabs).forEach(k => {
-                const sec = document.getElementById(`sec-${k}`);
-                if (sec) sec.classList.toggle('hidden', k !== tab);
-                const btn = document.getElementById(tabs[k]);
-                if (btn) btn.classList.toggle('active', k === tab);
+            ['diplomados', 'certificaciones', 'talleres'].forEach(k => {
+                const el = document.getElementById(`sec-${k}`);
+                if (el) el.classList.toggle('hidden', k !== tab);
             });
+            document.getElementById('tabDip').classList.toggle('active', tab === 'diplomados');
+            document.getElementById('tabCert').classList.toggle('active', tab === 'certificaciones');
+            document.getElementById('tabTal').classList.toggle('active', tab === 'talleres');
         };
 
         window.abrirModal = (tipo, id = null) => {
             const modal = document.getElementById(`modal-${tipo}`);
             const form = document.getElementById(`${tipo}Form`);
-            
-            if (!modal || !form) {
-                console.error(`Modal o formulario para ${tipo} no encontrado`);
-                return;
-            }
+            if (!modal || !form) return;
 
             modal.style.display = 'flex';
             form.reset();
@@ -225,21 +237,23 @@
             const editIdInput = document.getElementById(`editId${tipo.charAt(0).toUpperCase() + tipo.slice(1,3)}`);
             if (editIdInput) editIdInput.value = id || '';
 
-            if(tipo === 'diplomado' && id) {
-                const d = dataDip.find(x => x.id === id);
-                if (d) {
-                    document.getElementById('nombreDip').value = d.nombre || '';
-                    document.getElementById('duracionDip').value = d.duracion || '';
-                    document.getElementById('fechaInicioDip').value = d.fechaInicio || '';
-                    document.getElementById('inscripcionDip').value = d.inscripcion || 0;
-                    document.getElementById('descuentoDip').value = d.descuento || 0;
-                    document.getElementById('claseDip').value = d.costoClase || 0;
-                    document.getElementById('mesDip').value = d.costoMes || 0;
-                    document.getElementById('totalDip').value = d.costoTotal || 0;
-                    document.getElementById('certCostDip').value = d.costoCertExtra || 0;
-                    document.getElementById('evalCostDip').value = d.costoEvalExtra || 0;
-                    document.getElementById('linkDip').value = d.temarioLink || '';
+            if(tipo === 'diplomado') {
+                if(id) {
+                    const d = dataDip.find(x => x.id === id);
+                    if (d) {
+                        document.getElementById('nombreDip').value = d.nombre || '';
+                        document.getElementById('duracionDip').value = d.duracion || '';
+                        document.getElementById('fechaInicioDip').value = d.fechaInicio || '';
+                        document.getElementById('horarioDip').value = d.horario || ''; // Recuperar horario
+                        document.getElementById('inscripcionDip').value = d.inscripcion || 0;
+                        document.getElementById('descuentoDip').value = d.descuento || 0;
+                        document.getElementById('claseDip').value = d.costoClase || 0;
+                        document.getElementById('mesDip').value = d.costoMes || 0;
+                        document.getElementById('totalDip').value = d.costoTotal || 0;
+                        document.getElementById('linkDip').value = d.temarioLink || '';
+                    }
                 }
+                recalcDiplomado();
             } else if(tipo === 'certificacion' && id) {
                 const c = dataCert.find(x => x.id === id);
                 if (c) {
@@ -256,6 +270,7 @@
                         document.getElementById('nombreTal').value = t.nombre || '';
                         document.getElementById('costoPorDiaTal').value = t.costoPorDia || 0;
                         document.getElementById('horasTal').value = t.horasPorDia || '';
+                        document.getElementById('horarioTal').value = t.horario || ''; // Recuperar horario
                         document.getElementById('linkTal').value = t.linkDrive || '';
                         selectedDates = t.fechasArray || [];
                     }
@@ -270,6 +285,16 @@
             if (modal) modal.style.display = 'none';
         };
 
+        window.recalcDiplomado = () => {
+            const total = Number(document.getElementById('totalDip').value) || 0;
+            const desc = Number(document.getElementById('descuentoDip').value) || 0;
+            const final = total - (total * (desc / 100));
+            const savings = total - final;
+            
+            document.getElementById('finalPriceDip').innerText = `$${final.toLocaleString()}`;
+            document.getElementById('savingsDip').innerText = `-$${savings.toLocaleString()}`;
+        };
+
         function buildCalendar() {
             const grid = document.getElementById('calendarGrid');
             if (!grid) return;
@@ -277,8 +302,7 @@
             const year = now.getFullYear();
             const month = now.getMonth();
             const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            const monthTitle = document.getElementById('calMonthName');
-            if (monthTitle) monthTitle.innerText = `${monthNames[month]} ${year}`;
+            document.getElementById('calMonthName').innerText = `${monthNames[month]} ${year}`;
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             grid.innerHTML = '';
@@ -303,87 +327,86 @@
         }
 
         window.recalcTaller = () => {
-            const costoDiaInput = document.getElementById('costoPorDiaTal');
-            const summary = document.getElementById('talSummary');
-            const display = document.getElementById('totalTallerDisplay');
-            const hiddenCosto = document.getElementById('costoTal');
-            
-            if (!costoDiaInput || !summary || !display || !hiddenCosto) return;
-
-            const costoDia = Number(costoDiaInput.value) || 0;
+            const costoDia = Number(document.getElementById('costoPorDiaTal').value) || 0;
             const total = costoDia * selectedDates.length;
-            summary.innerText = `${selectedDates.length} día(s) seleccionados`;
-            display.innerText = `$${total.toLocaleString()}`;
-            hiddenCosto.value = total;
+            const summary = document.getElementById('talSummary');
+            if(summary) summary.innerText = `${selectedDates.length} día(s) seleccionados`;
+            const display = document.getElementById('totalTallerDisplay');
+            if(display) display.innerText = `$${total.toLocaleString()}`;
+            const input = document.getElementById('costoTal');
+            if(input) input.value = total;
         };
 
         function renderDip() {
             const grid = document.getElementById('diplomasGrid');
-            if (!grid) return;
-            grid.innerHTML = dataDip.map(d => `
-                <div class="bg-white p-5 rounded-3xl border border-pink-50 shadow-sm relative group">
+            grid.innerHTML = dataDip.map(d => {
+                const final = d.costoTotal - (d.costoTotal * ((d.descuento || 0) / 100));
+                return `
+                <div class="bg-white p-5 rounded-3xl border border-pink-50 shadow-sm relative overflow-hidden">
                     <div class="flex justify-between items-start mb-2">
-                        <h4 class="font-bold text-gray-800">${d.nombre}</h4>
+                        <h4 class="font-bold text-gray-800 leading-tight">${d.nombre}</h4>
                         <div class="flex gap-2">
                             <button onclick="abrirModal('diplomado', '${d.id}')" class="text-sm p-1">✏️</button>
-                            <button onclick="borrar('diplomados', '${d.id}')" class="text-sm p-1 opacity-30 hover:opacity-100">🗑️</button>
+                            <button onclick="borrar('diplomados', '${d.id}')" class="text-sm p-1 opacity-30">🗑️</button>
                         </div>
                     </div>
-                    <p class="text-[10px] font-bold text-pink-400 uppercase mb-4">${d.duracion || 'Sin duración'}</p>
+                    <div class="flex flex-wrap gap-x-3 gap-y-1 mb-4">
+                        <p class="text-[10px] font-bold text-pink-400 uppercase">${d.duracion || '6 meses'}</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">🕒 ${d.horario || 'Sin horario'}</p>
+                    </div>
                     <div class="space-y-1">
-                        <div class="flex justify-between text-[11px]"><span class="text-gray-400">Inscripción:</span><span class="font-bold">$${d.inscripcion || 0}</span></div>
-                        <div class="flex justify-between text-[11px]"><span class="text-gray-400">Mensual:</span><span class="font-bold">$${d.costoMes || 0}</span></div>
-                        <div class="mt-3 pt-3 border-t border-gray-50 flex justify-between items-center">
-                            <span class="text-xs font-bold text-gray-400 uppercase">Inversión:</span>
-                            <span class="text-lg font-black text-pink-600">$${Number(d.costoTotal || 0).toLocaleString()}</span>
+                        <div class="flex justify-between text-[11px]"><span class="text-gray-400">Inversión Base:</span><span class="line-through text-gray-300">$${Number(d.costoTotal || 0).toLocaleString()}</span></div>
+                        <div class="flex justify-between text-[11px]"><span class="text-gray-400">Descuento:</span><span class="text-green-500 font-bold">-${d.descuento || 0}%</span></div>
+                        <div class="mt-3 pt-3 border-t border-pink-50 flex justify-between items-center">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Ahorras: $${(d.costoTotal - final).toLocaleString()}</span>
+                            <span class="text-lg font-black text-pink-600">$${final.toLocaleString()}</span>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         function renderCert() {
             const grid = document.getElementById('certGrid');
-            if (!grid) return;
             grid.innerHTML = dataCert.map(c => `
-                <div class="bg-white p-5 rounded-3xl border border-blue-50 shadow-sm relative">
+                <div class="bg-white p-5 rounded-3xl border border-blue-50 shadow-sm">
                     <div class="flex justify-between items-start mb-3">
-                        <h4 class="font-bold text-gray-800">${c.nombre}</h4>
+                        <h4 class="font-bold text-gray-800 leading-tight">${c.nombre}</h4>
                         <div class="flex gap-2">
                             <button onclick="abrirModal('certificacion', '${c.id}')" class="text-sm p-1">✏️</button>
-                            <button onclick="borrar('certificaciones', '${c.id}')" class="text-sm p-1 opacity-30 hover:opacity-100">🗑️</button>
+                            <button onclick="borrar('certificaciones', '${c.id}')" class="text-sm p-1 opacity-30">🗑️</button>
                         </div>
                     </div>
                     <div class="bg-blue-50 p-3 rounded-2xl flex justify-between items-center">
-                        <span class="text-xs font-bold text-blue-500 uppercase">Total:</span>
+                        <span class="text-xs font-bold text-blue-500 uppercase">Inversión:</span>
                         <span class="text-xl font-black text-blue-700">$${(Number(c.costoCert || 0) + Number(c.costoEval || 0)).toLocaleString()}</span>
                     </div>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
         function renderTal() {
             const grid = document.getElementById('talleresGrid');
-            if (!grid) return;
             grid.innerHTML = dataTal.map(t => `
                 <div class="bg-white p-5 rounded-3xl border border-purple-50 shadow-sm">
                     <div class="flex justify-between items-start mb-1">
-                        <h4 class="font-bold text-gray-800">${t.nombre}</h4>
+                        <h4 class="font-bold text-gray-800 leading-tight">${t.nombre}</h4>
                         <div class="flex gap-2">
                             <button onclick="abrirModal('taller', '${t.id}')" class="text-sm p-1">✏️</button>
-                            <button onclick="borrar('talleres', '${t.id}')" class="text-sm p-1 opacity-30 hover:opacity-100">🗑️</button>
+                            <button onclick="borrar('talleres', '${t.id}')" class="text-sm p-1 opacity-30">🗑️</button>
                         </div>
                     </div>
-                    <div class="text-[10px] font-bold text-purple-400 mb-3">${t.fechasArray?.length || 0} DÍAS • ${t.horasPorDia || '--'}</div>
+                    <div class="flex flex-wrap gap-x-3 gap-y-1 mb-3">
+                        <div class="text-[10px] font-bold text-purple-400 uppercase">${t.fechasArray?.length || 0} DÍAS</div>
+                        <div class="text-[10px] font-bold text-gray-400 uppercase">🕒 ${t.horario || 'Sin horario'}</div>
+                    </div>
                     <div class="bg-purple-50 p-3 rounded-2xl flex justify-between items-center">
                         <span class="text-xs font-bold text-purple-600 uppercase">Total:</span>
                         <span class="text-xl font-black text-purple-700">$${Number(t.costo || 0).toLocaleString()}</span>
                     </div>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
-        window.borrar = async (col, id) => { if(confirm('¿Eliminar registro?')) await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', col, id)); };
+        window.borrar = async (col, id) => { if(confirm('¿Eliminar definitivamente?')) await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', col, id)); };
 
         document.getElementById('diplomadoForm').onsubmit = async (e) => {
             e.preventDefault();
@@ -392,13 +415,12 @@
                 nombre: document.getElementById('nombreDip').value,
                 duracion: document.getElementById('duracionDip').value,
                 fechaInicio: document.getElementById('fechaInicioDip').value,
+                horario: document.getElementById('horarioDip').value, // Guardar horario
                 inscripcion: Number(document.getElementById('inscripcionDip').value),
                 descuento: Number(document.getElementById('descuentoDip').value),
                 costoClase: Number(document.getElementById('claseDip').value),
                 costoMes: Number(document.getElementById('mesDip').value),
                 costoTotal: Number(document.getElementById('totalDip').value),
-                costoCertExtra: Number(document.getElementById('certCostDip').value),
-                costoEvalExtra: Number(document.getElementById('evalCostDip').value),
                 temarioLink: document.getElementById('linkDip').value,
                 updated: serverTimestamp()
             };
@@ -429,6 +451,7 @@
                 nombre: document.getElementById('nombreTal').value,
                 costoPorDia: Number(document.getElementById('costoPorDiaTal').value),
                 horasPorDia: document.getElementById('horasTal').value,
+                horario: document.getElementById('horarioTal').value, // Guardar horario
                 fechasArray: selectedDates,
                 costo: Number(document.getElementById('costoTal').value),
                 linkDrive: document.getElementById('linkTal').value,
